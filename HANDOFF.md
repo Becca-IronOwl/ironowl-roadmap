@@ -27,6 +27,14 @@ greyed and struck through; each has a name and an optional deadline, and overdue
 deadlines show in red). On narrower screens the To-do list moves below the board.
 All of it is shared and live, same as everything else.
 
+The To-do panel is **scoped to where you are**: when you're inside a workstream
+(or any task under it) it shows just that workstream's to-dos, and new to-dos
+you add there default to that workstream. At the goal/root view it shows every
+to-do, each tagged with its workstream. New to-dos can also be filed as
+"General" (not tied to a workstream) — those show only at the root view. When
+the "Assigned to <name>" dropdown is active, the panel narrows to that person's
+to-dos across all workstreams.
+
 **"Assigned to <name>" report:** the dropdown in the top bar lists every person
 who appears anywhere as an owner (task Owner field, to-do Name, or team-list
 Requested/Submitted by). Pick a name to swap the board for one flat list of
