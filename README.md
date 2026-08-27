@@ -2,13 +2,14 @@
 
 A single-file web app that shows the company roadmap as a recursive 3x3 "sudoku
 board" (goal in the center, up to 8 sub-items around it, click to drill in),
-plus three shared team lists: Resource requests, Process improvements, and a
-Moonshot parking lot.
+plus three shared team lists (Resource requests, Process improvements, Moonshot
+parking lot) and a shared To-do list.
 
 - **Frontend:** one static file, [`index.html`](index.html) — vanilla HTML/CSS/JS, no build step.
 - **Data:** [Supabase](https://supabase.com) (free-tier Postgres). One table,
-  `kv_store` (`key text primary key`, `value jsonb`), holding two rows: the whole
-  task tree and the team lists.
+  `kv_store` (`key text primary key`, `value jsonb`), one row per section:
+  `ironowl-roadmap-v1` (task tree), `ironowl-list-{resources,process,moonshot}-v1`,
+  `ironowl-todos-v1`.
 - **Hosting:** GitHub Pages.
 
 ## Editing the app

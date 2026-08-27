@@ -8,6 +8,13 @@ Anyone with the link can open and use it in any browser. No login, no Claude
 account. Edits save to Supabase and show up for everyone; open tabs refresh
 themselves within a second or two, and there's a manual **Refresh** button too.
 
+**What's on the page:** the roadmap board + breadcrumbs, the three team lists
+(Resource requests / Process improvements / Moonshot parking lot), and a **To do**
+list on the right (checkbox to complete — completed items drop to the bottom,
+greyed and struck through; each has a name and an optional deadline, and overdue
+deadlines show in red). On narrower screens the To-do list moves below the board.
+All of it is shared and live, same as everything else.
+
 ---
 
 ## Making future edits

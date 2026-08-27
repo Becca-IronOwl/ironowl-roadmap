@@ -26,7 +26,18 @@
     background: var(--cream);
     color: var(--navy);
   }
-  #app { max-width: 980px; margin: 0 auto; padding: 28px 20px 80px; }
+  #app { max-width: 1340px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  /* Two-column shell: roadmap on the left (capped so the board looks unchanged),
+     to-do list on the right. Stacks on narrower screens. */
+  .layout { display: flex; gap: 28px; align-items: flex-start; justify-content: center; }
+  .main-col { flex: 1 1 auto; max-width: 980px; min-width: 0; }
+  .todo-col { flex: 0 0 300px; position: sticky; top: 24px; align-self: flex-start; max-height: calc(100vh - 48px); overflow-y: auto; }
+  @media (max-width: 1180px) {
+    .layout { flex-direction: column; align-items: stretch; }
+    .main-col { max-width: none; }
+    .todo-col { flex-basis: auto; width: 100%; position: static; max-height: none; }
+  }
 
   .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; gap: 16px; }
   .topbar h1 { font-size: 22px; margin: 0 0 4px 0; letter-spacing: 0.2px; }
@@ -228,6 +239,42 @@
   .status-banner.info { background: var(--teal-tint); color: #235167; }
 
   .loading { text-align: center; padding: 60px 0; color: var(--text-muted); font-size: 14px; }
+
+  /* To-do list */
+  .todo-panel { background: #fff; border: 1px solid var(--card-border); border-radius: 12px; padding: 16px 16px 18px; }
+  .todo-panel h2 { font-size: 13px; margin: 0 0 12px; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px; }
+  .todo-add { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .todo-add input {
+    font-family: inherit; font-size: 13px; padding: 7px 9px; border: 1px solid var(--card-border);
+    border-radius: 6px; width: 100%; color: var(--navy);
+  }
+  .todo-add-row { display: flex; gap: 6px; }
+  .todo-add-row .todo-name { flex: 1 1 auto; min-width: 0; }
+  .todo-add-row .todo-date { flex: 0 1 auto; min-width: 0; }
+  .todo-add-btn {
+    background: var(--navy); color: #fff; border: none; border-radius: 6px;
+    padding: 7px 12px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0;
+  }
+  .todo-add-btn:hover { background: var(--navy-dark); }
+  .todo-list { list-style: none; margin: 0; padding: 0; }
+  .todo-item { display: flex; align-items: flex-start; gap: 9px; padding: 9px 2px; border-top: 1px solid #EEE9DB; }
+  .todo-item:first-child { border-top: none; }
+  .todo-item input[type="checkbox"] {
+    margin: 1px 0 0; width: 15px; height: 15px; accent-color: var(--navy); cursor: pointer; flex-shrink: 0;
+  }
+  .todo-body { flex: 1; min-width: 0; }
+  .todo-text { font-size: 13px; line-height: 1.35; color: var(--navy); word-break: break-word; }
+  .todo-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .todo-meta .overdue { color: var(--danger); font-weight: 600; }
+  .todo-del {
+    background: transparent; border: none; color: #C7C1AF; cursor: pointer;
+    font-size: 12px; padding: 2px 3px; line-height: 1; flex-shrink: 0; opacity: 0.5;
+  }
+  .todo-del:hover { opacity: 1; color: var(--danger); }
+  .todo-item.done .todo-text { text-decoration: line-through; color: var(--text-muted); }
+  .todo-item.done .todo-meta { color: #A9A99B; }
+  .todo-item.done .todo-meta .overdue { color: #A9A99B; font-weight: 400; }
+  .todo-empty { font-size: 12.5px; color: var(--text-muted); padding: 6px 2px; }
 </style>
 </head>
 <body>
@@ -275,6 +322,7 @@ const db = {
 };
 
 const STORAGE_KEY = "ironowl-roadmap-v1";
+const TODOS_KEY = "ironowl-todos-v1";
 const SHARED = true;
 const STATUSES = ["Not started", "In progress", "Done", "Blocked"];
 const STATUS_CLASS = {
@@ -511,6 +559,7 @@ window.refreshFromStorage = async function() {
   banner = null;
   await loadTree();
   await loadLists();
+  await loadTodos();
 };
 
 // Live updates: when anyone writes to kv_store, pull the change into open
@@ -522,8 +571,12 @@ function subscribeToLiveUpdates() {
       { event: "*", schema: "public", table: "kv_store" },
       () => {
         if (editingId || addingChildOf || addingToList || editingListEntry) return;
+        // Don't yank a half-typed to-do out from under someone.
+        const ae = document.activeElement;
+        if (ae && ae.id && ae.id.indexOf("todo-") === 0) return;
         loadTree(false);
         loadLists(false);
+        loadTodos(false);
       }
     )
     .subscribe();
@@ -917,8 +970,140 @@ function renderEmptyCell() {
   return '<div class="board-cell empty"></div>';
 }
 
+// ---------------------------------------------------------------------------
+// To-do list (right-hand column). Stored as its own kv_store row: an array of
+// { id, text, name, deadline, done, createdAt, completedAt }.
+// ---------------------------------------------------------------------------
+let todos = [];
+
+async function loadTodos(allowReset = true) {
+  try {
+    const result = await db.get(TODOS_KEY);
+    if (result && result.value) {
+      todos = JSON.parse(result.value);
+    } else if (allowReset) {
+      todos = [];
+    }
+  } catch (err) {
+    console.error("To-do load failed:", err);
+    // Keep whatever is already in memory.
+  }
+  render();
+}
+
+async function saveTodos() {
+  try {
+    const result = await db.set(TODOS_KEY, JSON.stringify(todos));
+    if (!result) banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
+  } catch (err) {
+    banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
+  }
+}
+
+window.addTodo = async function() {
+  const textEl = document.getElementById("todo-text");
+  const nameEl = document.getElementById("todo-name");
+  const dateEl = document.getElementById("todo-deadline");
+  const text = textEl.value.trim();
+  if (!text) { textEl.style.borderColor = "#B23B3B"; return; }
+  todos.push({
+    id: uid(),
+    text: text,
+    name: nameEl.value.trim(),
+    deadline: dateEl.value,
+    done: false,
+    createdAt: Date.now(),
+    completedAt: null
+  });
+  await saveTodos();
+  render();
+  setTimeout(() => {
+    const el = document.getElementById("todo-text");
+    if (el) el.focus();
+  }, 0);
+};
+
+window.handleTodoKey = function(ev) {
+  if (ev.key === "Enter") window.addTodo();
+};
+
+window.toggleTodo = async function(id) {
+  const t = todos.find(x => x.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  t.completedAt = t.done ? Date.now() : null;
+  await saveTodos();
+  render();
+};
+
+window.deleteTodo = async function(id) {
+  todos = todos.filter(x => x.id !== id);
+  await saveTodos();
+  render();
+};
+
+function formatDeadline(d) {
+  if (!d) return "";
+  const dt = new Date(d + "T00:00:00");
+  if (isNaN(dt.getTime())) return escapeHtml(d);
+  return dt.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function isOverdue(d) {
+  if (!d) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dt = new Date(d + "T00:00:00");
+  return !isNaN(dt.getTime()) && dt < today;
+}
+
+function renderTodoItem(t) {
+  const parts = [];
+  if (t.name) parts.push(escapeHtml(t.name));
+  if (t.deadline) {
+    const dl = formatDeadline(t.deadline);
+    parts.push(!t.done && isOverdue(t.deadline) ? '<span class="overdue">' + dl + '</span>' : dl);
+  }
+  const meta = parts.length ? '<div class="todo-meta">' + parts.join(' · ') + '</div>' : '';
+  return '<li class="todo-item' + (t.done ? ' done' : '') + '">' +
+    '<input type="checkbox"' + (t.done ? ' checked' : '') + ' onchange="toggleTodo(\'' + t.id + '\')">' +
+    '<div class="todo-body">' +
+      '<div class="todo-text">' + escapeHtml(t.text) + '</div>' + meta +
+    '</div>' +
+    '<button class="todo-del" title="Delete" onclick="deleteTodo(\'' + t.id + '\')">✕</button>' +
+  '</li>';
+}
+
+function renderTodoPanel() {
+  const active = todos.filter(t => !t.done);
+  const done = todos.filter(t => t.done).sort((a, b) => (a.completedAt || 0) - (b.completedAt || 0));
+  const ordered = active.concat(done);
+
+  let html = '<div class="todo-panel">';
+  html += '<h2>To do</h2>';
+  html += '<div class="todo-add">' +
+    '<input id="todo-text" placeholder="Add a to-do…" onkeydown="handleTodoKey(event)">' +
+    '<div class="todo-add-row">' +
+      '<input id="todo-name" class="todo-name" placeholder="Name">' +
+      '<input id="todo-deadline" class="todo-date" type="date" title="Deadline">' +
+      '<button class="todo-add-btn" onclick="addTodo()">Add</button>' +
+    '</div>' +
+  '</div>';
+
+  if (ordered.length === 0) {
+    html += '<div class="todo-empty">Nothing here yet.</div>';
+  } else {
+    html += '<ul class="todo-list">' + ordered.map(renderTodoItem).join('') + '</ul>';
+  }
+  html += '</div>';
+  return html;
+}
+
 function render() {
   const app = document.getElementById("app");
+  // The three loaders (tree / lists / todos) each call render() when they
+  // finish, in whatever order they resolve. The board needs the tree.
+  if (!tree) return;
   const node = getNode(currentId);
   const path = getPath(currentId);
   const children = node.children.map(id => getNode(id)).filter(Boolean);
@@ -967,11 +1152,16 @@ function render() {
 
   html += renderTeamLists();
 
-  app.innerHTML = html;
+  app.innerHTML =
+    '<div class="layout">' +
+      '<div class="main-col">' + html + '</div>' +
+      '<div class="todo-col">' + renderTodoPanel() + '</div>' +
+    '</div>';
 }
 
 loadTree();
 loadLists();
+loadTodos();
 subscribeToLiveUpdates();
 </script>
 </body>
