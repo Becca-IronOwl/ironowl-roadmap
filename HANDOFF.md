@@ -15,6 +15,15 @@ greyed and struck through; each has a name and an optional deadline, and overdue
 deadlines show in red). On narrower screens the To-do list moves below the board.
 All of it is shared and live, same as everything else.
 
+**"Assigned to <name>" report:** the dropdown in the top bar lists every person
+who appears anywhere as an owner (task Owner field, to-do Name, or team-list
+Requested/Submitted by). Pick a name to swap the board for one flat list of
+everything on that person's plate — roadmap tasks (with the path to find them
+and their status), their to-dos, and their team-list entries — with a total
+count. Click any roadmap row to jump to it; **Back to board** returns; **Print**
+gives a clean one-person sheet. Matching is exact but case-insensitive, so keep
+name spelling consistent ("Tom" and "tom" match; "Tom" and "Tom S." don't).
+
 ---
 
 ## Making future edits
