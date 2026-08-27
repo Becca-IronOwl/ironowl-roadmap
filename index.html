@@ -503,13 +503,9 @@ window.dismissBanner = function() {
   render();
 };
 
-window.resetRoadmap = async function() {
-  if (!window.confirm("Reset the entire roadmap back to the original 64-item plan? This deletes all edits and custom sub-roadmaps.")) return;
-  tree = seedTree();
-  currentId = "root";
-  await saveTree();
-  render();
-};
+// seedTree() still runs once automatically on the very first load (empty
+// database). There is deliberately no user-facing "reset everything" button -
+// it was too easy to wipe the whole team's roadmap by accident.
 
 window.refreshFromStorage = async function() {
   banner = null;
@@ -935,7 +931,6 @@ function render() {
     '<div class="topbar-actions">' +
       '<button class="icon-btn" onclick="document.getElementById(\'team-lists\').scrollIntoView({behavior:\'smooth\'})">Team lists \u2193</button>' +
       '<button class="icon-btn" onclick="refreshFromStorage()">Refresh</button>' +
-      '<button class="icon-btn" onclick="resetRoadmap()">Reset to original plan</button>' +
     '</div>' +
   '</div>';
 
