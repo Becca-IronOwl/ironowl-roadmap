@@ -65,8 +65,8 @@ probably not — it's the same trust model as a shared Google Doc with "anyone
 with the link can edit." Things to know:
 
 - **No edit history / undo.** A bad edit or deletion isn't automatically
-  recoverable. "Reset to original plan" only restores the *original 64-item
-  seed*, wiping all edits — it's not a real undo.
+  recoverable. (The old "Reset to original plan" button was removed because it
+  wiped everything and wasn't a real undo.)
 - **The link could leak.** If the URL gets forwarded outside the company,
   those people can edit too. The GitHub repo is public, so the app URL is
   effectively discoverable; the data itself is only reachable through the app.
