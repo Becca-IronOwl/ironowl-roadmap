@@ -27,7 +27,9 @@ create table if not exists public.todos (
   deadline     text not null default '',
   done         boolean not null default false,
   completed_at bigint,
-  created_at   timestamptz not null default now()
+  created_at   timestamptz not null default now(),
+  -- which top-level workstream this to-do belongs to (null = General)
+  workstream_id text references public.tasks(id) on delete set null
 );
 alter table public.todos enable row level security;
 create policy "todos read"   on public.todos for select to anon using (true);
