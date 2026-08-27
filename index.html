@@ -281,6 +281,38 @@
   .todo-item.done .todo-meta .overdue { color: #9DAA9C; font-weight: 400; }
   .todo-item.done input[type="checkbox"] { accent-color: var(--green); }
   .todo-empty { font-size: 12.5px; color: var(--text-muted); padding: 6px 2px; }
+
+  /* Owner picker + "assigned to <name>" report */
+  .owner-select {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 6px;
+    padding: 6px 8px; font-size: 12px; color: var(--navy); font-family: inherit;
+    cursor: pointer; max-width: 190px;
+  }
+  .owner-select:hover { border-color: var(--teal-border); }
+  .report-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .report-head h2 { font-size: 20px; margin: 0; color: var(--navy); }
+  .report-head-actions { display: flex; align-items: center; gap: 8px; }
+  .report-count { font-size: 12px; color: var(--text-muted); }
+  .report-group { margin-bottom: 22px; }
+  .report-group h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin: 0 0 8px 2px; }
+  .report-row {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s;
+  }
+  .report-row:hover { border-color: var(--teal-border); }
+  .report-row.static, .report-row.static:hover { cursor: default; border-color: var(--card-border); }
+  .report-row .rr-title { font-size: 14px; font-weight: 600; color: var(--navy); line-height: 1.35; }
+  .report-row .rr-title.rr-done { text-decoration: line-through; color: var(--text-muted); }
+  .report-row .rr-path { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; }
+  .report-row .rr-foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  .report-empty { font-size: 13px; color: var(--text-muted); line-height: 1.6; padding: 18px 2px; }
+
+  @media print {
+    .topbar-actions, .todo-col, .team-lists, .breadcrumb { display: none !important; }
+    .layout { display: block !important; }
+    .report-row { break-inside: avoid; border-color: #bbb; }
+    .report-row:hover { border-color: #bbb; }
+  }
 </style>
 </head>
 <body>
@@ -343,6 +375,7 @@ let currentId = "root";
 let editingId = null;
 let addingChildOf = null;
 let banner = null;
+let ownerFilter = null; // when set, show the "assigned to <name>" report instead of the board
 
 function uid() {
   return "n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -1105,21 +1138,149 @@ function renderTodoPanel() {
   return html;
 }
 
+// ---------------------------------------------------------------------------
+// "Assigned to <name>" report: one flat view of everything owned by a person,
+// across the whole roadmap tree plus the to-do and team lists.
+// ---------------------------------------------------------------------------
+function normName(v) { return (v || "").trim().toLowerCase(); }
+
+function allOwnerNames() {
+  const map = new Map(); // normalized -> display form
+  const add = v => { const k = normName(v); if (k && !map.has(k)) map.set(k, v.trim()); };
+  if (tree) Object.values(tree.nodes).forEach(n => add(n.owner));
+  todos.forEach(t => add(t.name));
+  Object.keys(LIST_SCHEMAS).forEach(k => (listsData[k] || []).forEach(e => { add(e.requestedBy); add(e.submittedBy); }));
+  return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
+}
+
+window.setOwnerFilter = function(value) {
+  ownerFilter = value ? value : null;
+  editingId = null;
+  addingChildOf = null;
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+window.jumpToNode = function(id) {
+  ownerFilter = null;
+  currentId = id;
+  render();
+};
+
+window.printReport = function() { window.print(); };
+
+function renderPersonReport() {
+  const target = normName(ownerFilter);
+  const label = escapeHtml(ownerFilter);
+
+  const tasks = tree
+    ? Object.values(tree.nodes)
+        .filter(n => normName(n.owner) === target)
+        .sort((a, b) => STATUSES.indexOf(a.status) - STATUSES.indexOf(b.status))
+    : [];
+  const todoMatches = todos.filter(t => normName(t.name) === target);
+  const listMatches = [];
+  Object.keys(LIST_SCHEMAS).forEach(k => {
+    (listsData[k] || []).forEach(e => {
+      if (normName(e.requestedBy) === target || normName(e.submittedBy) === target) {
+        listMatches.push({ schema: LIST_SCHEMAS[k], entry: e });
+      }
+    });
+  });
+
+  const total = tasks.length + todoMatches.length + listMatches.length;
+
+  let html = '<div class="report">';
+  html += '<div class="report-head">' +
+    '<h2>Assigned to ' + label + '</h2>' +
+    '<div class="report-head-actions">' +
+      '<span class="report-count">' + total + ' item' + (total === 1 ? '' : 's') + '</span>' +
+      '<button class="icon-btn" onclick="printReport()">Print</button>' +
+      '<button class="icon-btn" onclick="setOwnerFilter(\'\')">Back to board</button>' +
+    '</div>' +
+  '</div>';
+
+  if (total === 0) {
+    html += '<div class="report-empty">Nothing is assigned to ' + label + ' yet. ' +
+      'Assignments come from the <strong>Owner</strong> field on a task, the <strong>Name</strong> on a to-do, ' +
+      'and <strong>Requested by</strong> / <strong>Submitted by</strong> on the team lists.</div>';
+    html += '</div>';
+    return html;
+  }
+
+  if (tasks.length) {
+    html += '<div class="report-group"><h3>Roadmap tasks (' + tasks.length + ')</h3>';
+    tasks.forEach(n => {
+      const path = getPath(n.id);
+      const trail = path.slice(0, -1).map(p => escapeHtml(p.title)).join(' › ');
+      const kids = n.children.length;
+      html += '<div class="report-row" onclick="jumpToNode(\'' + n.id + '\')">' +
+        '<div class="rr-title">' + escapeHtml(n.title) + '</div>' +
+        (trail ? '<div class="rr-path">' + trail + '</div>' : '') +
+        '<div class="rr-foot">' +
+          '<span class="status-pill ' + STATUS_CLASS[n.status] + '">' + n.status + '</span>' +
+          (kids ? '<span class="subtask-count">' + kids + ' subtask' + (kids === 1 ? '' : 's') + '</span>' : '') +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (todoMatches.length) {
+    html += '<div class="report-group"><h3>To-dos (' + todoMatches.length + ')</h3>';
+    todoMatches.forEach(t => {
+      html += '<div class="report-row static">' +
+        '<div class="rr-title' + (t.done ? ' rr-done' : '') + '">' + escapeHtml(t.text) + '</div>' +
+        '<div class="rr-foot">' +
+          (t.deadline ? '<span class="rr-path">Due ' + escapeHtml(formatDeadline(t.deadline)) + '</span>' : '') +
+          '<span class="status-pill ' + (t.done ? 'status-done">Done' : 'status-in-progress">Open') + '</span>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (listMatches.length) {
+    html += '<div class="report-group"><h3>Team lists (' + listMatches.length + ')</h3>';
+    listMatches.forEach(m => {
+      const first = m.schema.fields[0].id;
+      html += '<div class="report-row static">' +
+        '<div class="rr-title">' + escapeHtml(m.entry[first] || '(untitled)') + '</div>' +
+        '<div class="rr-path">' + escapeHtml(m.schema.title) + '</div>' +
+        (m.entry.status ? '<div class="rr-foot"><span class="status-pill status-in-progress">' + escapeHtml(m.entry.status) + '</span></div>' : '') +
+      '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
 function render() {
   const app = document.getElementById("app");
   // The three loaders (tree / lists / todos) each call render() when they
   // finish, in whatever order they resolve. The board needs the tree.
   if (!tree) return;
-  const node = getNode(currentId);
-  const path = getPath(currentId);
-  const children = node.children.map(id => getNode(id)).filter(Boolean);
-  const ringChildren = children.slice(0, 8);
-  const overflowChildren = children.slice(8);
+
+  const names = allOwnerNames();
+  let selector = '';
+  if (names.length) {
+    const opts = names.slice();
+    if (ownerFilter && !opts.some(n => normName(n) === normName(ownerFilter))) opts.push(ownerFilter);
+    selector = '<select class="owner-select" onchange="setOwnerFilter(this.value)" title="Show everything assigned to one person">' +
+      '<option value="">Roadmap board</option>' +
+      opts.map(nm => '<option value="' + escapeHtml(nm) + '"' +
+        (ownerFilter && normName(nm) === normName(ownerFilter) ? ' selected' : '') + '>' +
+        escapeHtml(nm) + ' \u2014 assignments</option>').join('') +
+      '</select>';
+  }
 
   let html = '';
   html += '<div class="topbar">' +
     '<div><h1>IronOwl Roadmap</h1><div class="sub">Shared with your team \u2014 click any task to open its subtasks</div></div>' +
     '<div class="topbar-actions">' +
+      selector +
       '<button class="icon-btn" onclick="document.getElementById(\'team-lists\').scrollIntoView({behavior:\'smooth\'})">Team lists \u2193</button>' +
       '<button class="icon-btn" onclick="refreshFromStorage()">Refresh</button>' +
     '</div>' +
@@ -1129,31 +1290,41 @@ function render() {
     html += '<div class="status-banner ' + banner.type + '" onclick="dismissBanner()">' + escapeHtml(banner.text) + ' (dismiss)</div>';
   }
 
-  html += renderBreadcrumb(path);
+  if (ownerFilter) {
+    html += renderPersonReport();
+  } else {
+    const node = getNode(currentId);
+    const path = getPath(currentId);
+    const children = node.children.map(id => getNode(id)).filter(Boolean);
+    const ringChildren = children.slice(0, 8);
+    const overflowChildren = children.slice(8);
 
-  // 3x3 board: center = current node, ring = up to 8 children
-  const ringOrder = [0, 1, 2, 3, 5, 6, 7, 8]; // grid positions skipping center (4)
-  const cells = new Array(9).fill(null);
-  cells[4] = renderCenterCell(node);
-  ringOrder.forEach((pos, i) => {
-    cells[pos] = ringChildren[i] ? renderChildCell(ringChildren[i]) : renderEmptyCell();
-  });
+    html += renderBreadcrumb(path);
 
-  html += '<div class="board">' + cells.join('') + '</div>';
+    // 3x3 board: center = current node, ring = up to 8 children
+    const ringOrder = [0, 1, 2, 3, 5, 6, 7, 8]; // grid positions skipping center (4)
+    const cells = new Array(9).fill(null);
+    cells[4] = renderCenterCell(node);
+    ringOrder.forEach((pos, i) => {
+      cells[pos] = ringChildren[i] ? renderChildCell(ringChildren[i]) : renderEmptyCell();
+    });
 
-  html += '<div class="board-note">' + children.length + ' subtask' + (children.length === 1 ? '' : 's') +
-    (addingChildOf === node.id ? '' : ' \u00b7 <span style="text-decoration:underline;cursor:pointer;" onclick="startAddChild(\'' + node.id + '\')">+ add another</span>') +
-  '</div>';
+    html += '<div class="board">' + cells.join('') + '</div>';
 
-  if (addingChildOf === node.id) {
-    html += renderAddCard(node.id);
-  }
+    html += '<div class="board-note">' + children.length + ' subtask' + (children.length === 1 ? '' : 's') +
+      (addingChildOf === node.id ? '' : ' \u00b7 <span style="text-decoration:underline;cursor:pointer;" onclick="startAddChild(\'' + node.id + '\')">+ add another</span>') +
+    '</div>';
 
-  if (overflowChildren.length > 0) {
-    html += '<div class="overflow-heading">' + overflowChildren.length + ' more subtask' + (overflowChildren.length === 1 ? '' : 's') + ' (beyond the board\u2019s 8 slots)</div>';
-    html += '<div class="children-grid">';
-    overflowChildren.forEach(child => { html += renderChildCard(child); });
-    html += '</div>';
+    if (addingChildOf === node.id) {
+      html += renderAddCard(node.id);
+    }
+
+    if (overflowChildren.length > 0) {
+      html += '<div class="overflow-heading">' + overflowChildren.length + ' more subtask' + (overflowChildren.length === 1 ? '' : 's') + ' (beyond the board\u2019s 8 slots)</div>';
+      html += '<div class="children-grid">';
+      overflowChildren.forEach(child => { html += renderChildCard(child); });
+      html += '</div>';
+    }
   }
 
   html += renderTeamLists();
