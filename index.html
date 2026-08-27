@@ -106,11 +106,17 @@
   .board-cell.empty { background: transparent; border: 1.5px dashed #C9C4B2; }
   .board-cell .cell-kicker { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; margin-bottom: 4px; }
   .board-cell.center .cell-kicker { color: #9FC3D6; }
+  .board-cell .cell-body { flex: 1 1 auto; min-height: 0; }
   .board-cell .cell-title {
-    font-size: 14px; font-weight: 600; line-height: 1.3; flex: 1;
+    font-size: 14px; font-weight: 600; line-height: 1.3;
     display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
   }
   .board-cell.center .cell-title { font-size: 15px; -webkit-line-clamp: 3; }
+  .board-cell .cell-sub {
+    font-size: 11px; font-style: italic; line-height: 1.3; margin-top: 3px; color: var(--text-muted);
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .board-cell.center .cell-sub { color: #9FC3D6; }
   .board-cell .cell-footer { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 8px; font-size: 10.5px; }
   .board-cell .cell-owner { color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .board-cell.center .cell-owner { color: #C6D6E0; }
@@ -190,6 +196,7 @@
   .child-card:hover { border-color: var(--teal-border); }
   .child-card.done { background: #EDF4EC; border-color: #C9DDCA; }
   .child-card .card-title { font-size: 15px; font-weight: 600; line-height: 1.35; padding-right: 40px; }
+  .child-card .card-sub { font-size: 12px; font-style: italic; color: var(--text-muted); line-height: 1.35; margin-top: -4px; }
   .card-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; z-index: 5; }
   .mini-btn {
     background: transparent; border: none; color: var(--text-muted); cursor: pointer;
@@ -213,6 +220,7 @@
     border-radius: 6px; width: 100%;
   }
   .edit-form textarea { resize: vertical; min-height: 44px; }
+  .edit-form textarea.desc-edit { min-height: 30px; font-style: italic; }
   .edit-row { display: flex; gap: 8px; }
   .edit-actions { display: flex; gap: 6px; justify-content: flex-end; }
   .edit-actions button { font-size: 12px; padding: 5px 10px; border-radius: 6px; cursor: pointer; }
@@ -315,6 +323,7 @@
   .report-row .rr-title { font-size: 14px; font-weight: 600; color: var(--navy); line-height: 1.35; }
   .report-row .rr-title.rr-done { text-decoration: line-through; color: var(--text-muted); }
   .report-row .rr-path { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; }
+  .report-row .rr-sub { font-size: 11.5px; font-style: italic; color: var(--text-muted); margin-top: 2px; }
   .report-row .rr-foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
   .report-empty { font-size: 13px; color: var(--text-muted); line-height: 1.6; padding: 18px 2px; }
 
@@ -443,7 +452,8 @@ function buildTree(rows) {
   const nodes = {};
   rows.forEach(r => {
     nodes[r.id] = {
-      id: r.id, title: r.title, owner: r.owner || "", status: r.status || "Not started",
+      id: r.id, title: r.title, description: r.description || "",
+      owner: r.owner || "", status: r.status || "Not started",
       parentId: r.parent_id, children: [], _sort: r.sort_order || 0
     };
   });
@@ -547,16 +557,19 @@ window.cancelEdit = function() {
 
 window.saveEdit = async function(id) {
   const titleEl = document.getElementById("edit-title-" + id);
+  const descEl = document.getElementById("edit-desc-" + id);
   const ownerEl = document.getElementById("edit-owner-" + id);
   const statusEl = document.getElementById("edit-status-" + id);
   const title = titleEl.value.trim();
   if (!title) { titleEl.style.borderColor = "#B23B3B"; return; }
   const node = getNode(id);
   const patch = { title: title, updated_at: new Date().toISOString() };
+  if (descEl) patch.description = descEl.value.trim();
   // The root goal's edit form has no owner/status inputs - guard for that.
   if (ownerEl) patch.owner = ownerEl.value.trim();
   if (statusEl) patch.status = statusEl.value;
-  Object.assign(node, { title: patch.title });          // optimistic
+  node.title = patch.title;                              // optimistic
+  if (descEl) node.description = patch.description;
   if (ownerEl) node.owner = patch.owner;
   if (statusEl) node.status = patch.status;
   editingId = null;
@@ -605,7 +618,7 @@ window.confirmAddChild = async function(parentId) {
   if (!title) { input.style.borderColor = "#B23B3B"; return; }
   const id = uid();
   const sortOrder = Date.now();
-  tree.nodes[id] = { id, title, owner: "", status: "Not started", parentId, children: [], _sort: sortOrder };
+  tree.nodes[id] = { id, title, description: "", owner: "", status: "Not started", parentId, children: [], _sort: sortOrder };
   getNode(parentId).children.push(id);
   addingChildOf = null;
   render();
@@ -920,6 +933,7 @@ function renderChildCard(child) {
     return '<div class="child-card" style="cursor:default;" onclick="event.stopPropagation()">' +
       '<div class="edit-form">' +
         '<textarea id="edit-title-' + child.id + '">' + escapeHtml(child.title) + '</textarea>' +
+        '<textarea id="edit-desc-' + child.id + '" class="desc-edit" placeholder="Description (optional)">' + escapeHtml(child.description || "") + '</textarea>' +
         '<div class="edit-row">' +
           '<input id="edit-owner-' + child.id + '" placeholder="Owner" value="' + escapeHtml(child.owner || "") + '">' +
           '<select id="edit-status-' + child.id + '">' +
@@ -945,6 +959,7 @@ function renderChildCard(child) {
       '<button class="mini-btn" title="Delete" onclick="deleteNode(\'' + child.id + '\', event)">\u2715</button>' +
     '</div>' +
     '<div class="card-title">' + escapeHtml(child.title) + '</div>' +
+    (child.description ? '<div class="card-sub">' + escapeHtml(child.description) + '</div>' : '') +
     '<div class="card-footer">' +
       ownerHtml +
       '<span class="status-pill ' + STATUS_CLASS[child.status] + '">' + child.status + '</span>' +
@@ -978,6 +993,7 @@ function renderCenterCell(node) {
     return '<div class="board-cell center" style="grid-column:2; grid-row:2;" onclick="event.stopPropagation()">' +
       '<div class="edit-form">' +
         '<textarea id="edit-title-' + node.id + '">' + escapeHtml(node.title) + '</textarea>' +
+        '<textarea id="edit-desc-' + node.id + '" class="desc-edit" placeholder="Description (optional)">' + escapeHtml(node.description || "") + '</textarea>' +
         (!isRoot ? '<div class="edit-row">' +
           '<input id="edit-owner-' + node.id + '" placeholder="Owner" value="' + escapeHtml(node.owner || "") + '">' +
           '<select id="edit-status-' + node.id + '">' +
@@ -1000,7 +1016,9 @@ function renderCenterCell(node) {
 
   return '<div class="board-cell center" style="grid-column:2; grid-row:2;">' +
     '<div class="board-controls"><button class="mini-btn" title="Edit" onclick="startEdit(\'' + node.id + '\', event)">\u270E</button></div>' +
-    '<div><div class="cell-kicker">' + kicker + '</div><div class="cell-title">' + escapeHtml(node.title) + '</div></div>' +
+    '<div class="cell-body"><div class="cell-kicker">' + kicker + '</div><div class="cell-title">' + escapeHtml(node.title) + '</div>' +
+      (node.description ? '<div class="cell-sub">' + escapeHtml(node.description) + '</div>' : '') +
+    '</div>' +
     footer +
   '</div>';
 }
@@ -1010,6 +1028,7 @@ function renderChildCell(child) {
     return '<div class="board-cell child" style="cursor:default;" onclick="event.stopPropagation()">' +
       '<div class="edit-form">' +
         '<textarea id="edit-title-' + child.id + '">' + escapeHtml(child.title) + '</textarea>' +
+        '<textarea id="edit-desc-' + child.id + '" class="desc-edit" placeholder="Description (optional)">' + escapeHtml(child.description || "") + '</textarea>' +
         '<div class="edit-row">' +
           '<input id="edit-owner-' + child.id + '" placeholder="Owner" value="' + escapeHtml(child.owner || "") + '">' +
         '</div>' +
@@ -1030,7 +1049,9 @@ function renderChildCell(child) {
       '<button class="mini-btn" title="Edit" onclick="startEdit(\'' + child.id + '\', event)">\u270E</button>' +
       '<button class="mini-btn" title="Delete" onclick="deleteNode(\'' + child.id + '\', event)">\u2715</button>' +
     '</div>' +
-    '<div class="cell-title">' + escapeHtml(child.title) + '</div>' +
+    '<div class="cell-body"><div class="cell-title">' + escapeHtml(child.title) + '</div>' +
+      (child.description ? '<div class="cell-sub">' + escapeHtml(child.description) + '</div>' : '') +
+    '</div>' +
     '<div class="cell-footer">' +
       '<span class="cell-owner"><span class="status-dot ' + statusDotClass(child.status) + '"></span> ' + (child.owner ? escapeHtml(child.owner) : 'Unassigned') + '</span>' +
     '</div>' +
@@ -1294,6 +1315,7 @@ function renderPersonReport() {
       const kids = n.children.length;
       html += '<div class="report-row" onclick="jumpToNode(\'' + n.id + '\')">' +
         '<div class="rr-title">' + escapeHtml(n.title) + '</div>' +
+        (n.description ? '<div class="rr-sub">' + escapeHtml(n.description) + '</div>' : '') +
         (trail ? '<div class="rr-path">' + trail + '</div>' : '') +
         '<div class="rr-foot">' +
           '<span class="status-pill ' + STATUS_CLASS[n.status] + '">' + n.status + '</span>' +
