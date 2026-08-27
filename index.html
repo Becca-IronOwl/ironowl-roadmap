@@ -102,6 +102,7 @@
   .board-cell.center { background: var(--navy); color: #fff; }
   .board-cell.child { background: #fff; border: 1px solid var(--card-border); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
   .board-cell.child:hover { border-color: var(--teal-border); box-shadow: 0 0 0 2px rgba(91,143,168,0.15); }
+  .board-cell.child.done { background: #EDF4EC; border-color: #C9DDCA; }
   .board-cell.empty { background: transparent; border: 1.5px dashed #C9C4B2; }
   .board-cell .cell-kicker { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; margin-bottom: 4px; }
   .board-cell.center .cell-kicker { color: #9FC3D6; }
@@ -187,6 +188,7 @@
     transition: border-color 0.15s;
   }
   .child-card:hover { border-color: var(--teal-border); }
+  .child-card.done { background: #EDF4EC; border-color: #C9DDCA; }
   .child-card .card-title { font-size: 15px; font-weight: 600; line-height: 1.35; padding-right: 40px; }
   .card-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; z-index: 5; }
   .mini-btn {
@@ -937,7 +939,7 @@ function renderChildCard(child) {
     ? '<span class="owner-tag">' + escapeHtml(child.owner) + '</span>'
     : '<span class="owner-tag empty">Unassigned</span>';
 
-  return '<div class="child-card" onclick="navigateTo(\'' + child.id + '\')">' +
+  return '<div class="child-card' + (child.status === "Done" ? " done" : "") + '" onclick="navigateTo(\'' + child.id + '\')">' +
     '<div class="card-controls">' +
       '<button class="mini-btn" title="Edit" onclick="startEdit(\'' + child.id + '\', event)">\u270E</button>' +
       '<button class="mini-btn" title="Delete" onclick="deleteNode(\'' + child.id + '\', event)">\u2715</button>' +
@@ -1023,7 +1025,7 @@ function renderChildCell(child) {
   }
 
   const count = child.children.length;
-  return '<div class="board-cell child" onclick="navigateTo(\'' + child.id + '\')">' +
+  return '<div class="board-cell child' + (child.status === "Done" ? " done" : "") + '" onclick="navigateTo(\'' + child.id + '\')">' +
     '<div class="board-controls">' +
       '<button class="mini-btn" title="Edit" onclick="startEdit(\'' + child.id + '\', event)">\u270E</button>' +
       '<button class="mini-btn" title="Delete" onclick="deleteNode(\'' + child.id + '\', event)">\u2715</button>' +
