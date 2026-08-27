@@ -6,10 +6,16 @@ plus three shared team lists (Resource requests, Process improvements, Moonshot
 parking lot) and a shared To-do list.
 
 - **Frontend:** one static file, [`index.html`](index.html) — vanilla HTML/CSS/JS, no build step.
-- **Data:** [Supabase](https://supabase.com) (free-tier Postgres). One table,
-  `kv_store` (`key text primary key`, `value jsonb`), one row per section:
-  `ironowl-roadmap-v1` (task tree), `ironowl-list-{resources,process,moonshot}-v1`,
-  `ironowl-todos-v1`.
+- **Data:** [Supabase](https://supabase.com) (free-tier Postgres), one row per
+  item across three tables: `tasks` (the roadmap tree, self-referencing via
+  `parent_id` with `on delete cascade`), `todos`, and `list_entries` (the three
+  team lists; dynamic fields in a `data jsonb` column). Row Level Security allows
+  the anon key to read/insert/update/delete. All three are in the
+  `supabase_realtime` publication for live updates.
+- **Backups:** `.github/workflows/backup.yml` snapshots all three tables to
+  `backups/` daily.
+- The pre-2026-08 single-blob `kv_store` table is kept as a migration backstop;
+  `docs/migrate-to-per-row.sql` is the one-time migration that was used.
 - **Hosting:** GitHub Pages.
 
 ## Editing the app
@@ -19,26 +25,13 @@ minute. The roadmap *content* (task titles, owners, statuses, list entries) is
 edited live in the app by anyone with the URL — that data lives in Supabase, not
 in this file.
 
-## Database setup (already done once)
+## Database setup (already done)
 
-Run in the Supabase SQL Editor:
-
-```sql
-create table if not exists public.kv_store (
-  key        text primary key,
-  value      jsonb not null default '{}'::jsonb,
-  updated_at timestamptz not null default now()
-);
-
-alter table public.kv_store enable row level security;
-
-create policy "kv public read"   on public.kv_store for select to anon using (true);
-create policy "kv public insert" on public.kv_store for insert to anon with check (true);
-create policy "kv public update" on public.kv_store for update to anon using (true) with check (true);
-
-alter publication supabase_realtime add table public.kv_store;
-```
+The `tasks` / `todos` / `list_entries` tables, their RLS policies, and the
+realtime publication are defined in [`docs/schema.sql`](docs/schema.sql). Data
+was moved out of the original single-blob `kv_store` table with
+[`docs/migrate-to-per-row.sql`](docs/migrate-to-per-row.sql).
 
 The `SUPABASE_URL` and `SUPABASE_ANON_KEY` near the top of the `<script>` in
 `index.html` are public by design (the anon key only grants what the RLS
-policies above allow). The database password is never stored in this repo.
+policies allow). The database password is never stored in this repo.

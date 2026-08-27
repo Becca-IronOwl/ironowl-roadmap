@@ -8,6 +8,18 @@ Anyone with the link can open and use it in any browser. No login, no Claude
 account. Edits save to Supabase and show up for everyone; open tabs refresh
 themselves within a second or two, and there's a manual **Refresh** button too.
 
+**Data model:** every task, to-do, and team-list entry is its own database row
+(tables `tasks`, `todos`, `list_entries`), and each edit saves just that one
+row. Two people editing different items can't overwrite each other. Only the
+exact same field of the same item, saved within the same instant, falls back to
+"last save wins". (Before Aug 2026 the whole roadmap was one JSON blob and any
+two near-simultaneous edits could clobber each other - that's what got fixed.)
+
+**Backups:** a GitHub Action (`.github/workflows/backup.yml`) snapshots all
+three tables to `backups/YYYY-MM-DD.json` in the repo once a day, keeping 120
+days. Run it on demand any time from the repo's **Actions** tab -> *Daily data
+backup* -> *Run workflow*. To restore, hand Claude a backup file.
+
 **What's on the page:** the roadmap board + breadcrumbs, the three team lists
 (Resource requests / Process improvements / Moonshot parking lot), and a **To do**
 list on the right (checkbox to complete — completed items drop to the bottom,
@@ -51,9 +63,9 @@ safe to have in public code — see README.
 
 ## Cost risk
 
-**Today: $0/month, and that's stable.** The app stores everything as two small
-rows of JSON. Even heavy daily use by the whole team is a rounding error against
-Supabase's free tier:
+**Today: $0/month, and that's stable.** The app stores a few hundred small rows.
+Even heavy daily use by the whole team is a rounding error against Supabase's
+free tier:
 
 | Supabase Free limit | What we use | Realistic risk |
 |---|---|---|
@@ -80,16 +92,16 @@ original Claude version worked.
 probably not — it's the same trust model as a shared Google Doc with "anyone
 with the link can edit." Things to know:
 
-- **No edit history / undo.** A bad edit or deletion isn't automatically
-  recoverable. (The old "Reset to original plan" button was removed because it
-  wiped everything and wasn't a real undo.)
+- **No in-app undo.** A bad edit or deletion can't be un-done from the app.
+  But the daily backup (above) means it can be recovered from the last snapshot.
+  (The old "Reset to original plan" button was removed because it wiped
+  everything and wasn't a real undo.)
 - **The link could leak.** If the URL gets forwarded outside the company,
   those people can edit too. The GitHub repo is public, so the app URL is
   effectively discoverable; the data itself is only reachable through the app.
 
 **If you want to tighten this later, cheapest → most work:**
-1. **Backups:** a scheduled job (or a person) that snapshots the two Supabase
-   rows weekly, so a bad change can be rolled back. ~1 hour to set up.
+1. ~~Backups~~ — **done** (daily automated snapshot, see above).
 2. **A shared password gate** on the app before it loads. Keeps casual/accidental
    outsiders out. Half a day.
 3. **Real accounts** (Supabase Auth — email or Google login) with read-only vs.
