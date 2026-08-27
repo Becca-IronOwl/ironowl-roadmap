@@ -1,4 +1,4 @@
-# IronOwl Roadmap — how it's set up
+# Cube Nine — how it's set up
 
 **Live app:** https://becca-ironowl.github.io/ironowl-roadmap/
 **Code:** https://github.com/Becca-IronOwl/ironowl-roadmap

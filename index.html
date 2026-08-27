@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>IronOwl Roadmap</title>
+<title>Cube Nine</title>
 <style>
   :root {
     --navy: #16324F;
@@ -327,7 +327,7 @@
 </style>
 </head>
 <body>
-<div id="app"><div class="loading">Loading roadmap...</div></div>
+<div id="app"><div class="loading">Loading Cube Nine...</div></div>
 
 <!-- Supabase client (public CDN, no build step) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1287,7 +1287,7 @@ function renderPersonReport() {
   }
 
   if (tasks.length) {
-    html += '<div class="report-group"><h3>Roadmap tasks (' + tasks.length + ')</h3>';
+    html += '<div class="report-group"><h3>Tasks (' + tasks.length + ')</h3>';
     tasks.forEach(n => {
       const path = getPath(n.id);
       const trail = path.slice(0, -1).map(p => escapeHtml(p.title)).join(' › ');
@@ -1349,7 +1349,7 @@ function render() {
     const opts = names.slice();
     if (ownerFilter && !opts.some(n => normName(n) === normName(ownerFilter))) opts.push(ownerFilter);
     selector = '<select class="owner-select" onchange="setOwnerFilter(this.value)" title="Show everything assigned to one person">' +
-      '<option value="">Roadmap board</option>' +
+      '<option value="">Cube Nine board</option>' +
       opts.map(nm => '<option value="' + escapeHtml(nm) + '"' +
         (ownerFilter && normName(nm) === normName(ownerFilter) ? ' selected' : '') + '>' +
         escapeHtml(nm) + ' \u2014 assignments</option>').join('') +
@@ -1358,7 +1358,7 @@ function render() {
 
   let html = '';
   html += '<div class="topbar">' +
-    '<div><h1>IronOwl Roadmap</h1><div class="sub">Shared with your team \u2014 click any task to open its subtasks</div></div>' +
+    '<div><h1>Cube Nine</h1><div class="sub">Shared with your team \u2014 click any task to open its subtasks</div></div>' +
     '<div class="topbar-actions">' +
       selector +
       '<button class="icon-btn" onclick="document.getElementById(\'team-lists\').scrollIntoView({behavior:\'smooth\'})">Team lists \u2193</button>' +
