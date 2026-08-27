@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IronOwl Roadmap</title>
+<style>
+  :root {
+    --navy: #16324F;
+    --navy-dark: #0F2438;
+    --cream: #F5F1E7;
+    --gold: #C9971F;
+    --gold-fill: #F6DFA0;
+    --teal-tint: #DCEAF0;
+    --teal-border: #5B8FA8;
+    --card-border: #D8D4C6;
+    --text-muted: #6B7680;
+    --danger: #B23B3B;
+    --danger-bg: #FBEAEA;
+    --green: #2F7D5C;
+    --green-bg: #E4F3EC;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Calibri, Arial, sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+  }
+  #app { max-width: 980px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; gap: 16px; }
+  .topbar h1 { font-size: 22px; margin: 0 0 4px 0; letter-spacing: 0.2px; }
+  .topbar .sub { font-size: 13px; color: var(--text-muted); }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .icon-btn {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 6px;
+    padding: 6px 10px; font-size: 12px; color: var(--navy); cursor: pointer;
+  }
+  .icon-btn:hover { background: var(--teal-tint); }
+
+  .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 13px; margin-bottom: 16px; color: var(--text-muted); }
+  .breadcrumb .crumb { cursor: pointer; padding: 2px 4px; border-radius: 4px; }
+  .breadcrumb .crumb:hover { background: var(--teal-tint); color: var(--navy); }
+  .breadcrumb .crumb.current { color: var(--navy); font-weight: 600; cursor: default; }
+  .breadcrumb .crumb.current:hover { background: none; }
+  .breadcrumb .sep { color: #B9C4CC; }
+
+  .current-card {
+    background: var(--navy); color: #fff; border-radius: 12px; padding: 20px 22px;
+    margin-bottom: 22px; position: relative;
+  }
+  .current-card .kicker { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #9FC3D6; margin-bottom: 6px; }
+  .current-card .title-row { display: flex; align-items: flex-start; gap: 10px; }
+  .current-card h2 { font-size: 24px; margin: 0; line-height: 1.3; flex: 1; }
+  .current-card textarea.title-edit {
+    font-size: 24px; font-weight: 600; line-height: 1.3; flex: 1; background: rgba(255,255,255,0.08);
+    color: #fff; border: 1px solid rgba(255,255,255,0.35); border-radius: 6px; padding: 6px 8px;
+    font-family: inherit; resize: vertical; min-height: 40px;
+  }
+  .current-card .meta-row { display: flex; gap: 18px; margin-top: 14px; flex-wrap: wrap; }
+  .current-meta-field { display: flex; flex-direction: column; gap: 4px; }
+  .current-meta-field label { font-size: 11px; color: #9FC3D6; text-transform: uppercase; letter-spacing: 0.5px; }
+  .current-meta-field input, .current-meta-field select {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: #fff;
+    border-radius: 6px; padding: 6px 8px; font-size: 13px; font-family: inherit;
+  }
+  .current-meta-field input::placeholder { color: rgba(255,255,255,0.5); }
+  .ghost-btn {
+    background: transparent; border: 1px solid rgba(255,255,255,0.4); color: #fff;
+    border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;
+  }
+  .ghost-btn:hover { background: rgba(255,255,255,0.12); }
+  .gold-btn {
+    background: var(--gold-fill); border: 1px solid var(--gold); color: #4A3A0F;
+    border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-weight: 600;
+  }
+  .gold-btn:hover { filter: brightness(0.96); }
+
+  .children-heading { font-size: 13px; color: var(--text-muted); margin: 0 0 10px 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .children-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+
+  .board {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 10px; border: 2px solid var(--navy); border-radius: 12px; padding: 10px;
+    background: #EDE9DC;
+  }
+  .board-cell {
+    border-radius: 8px; padding: 10px 12px; min-height: 148px;
+    display: flex; flex-direction: column; justify-content: space-between; position: relative;
+  }
+  .board-cell.center { background: var(--navy); color: #fff; }
+  .board-cell.child { background: #fff; border: 1px solid var(--card-border); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+  .board-cell.child:hover { border-color: var(--teal-border); box-shadow: 0 0 0 2px rgba(91,143,168,0.15); }
+  .board-cell.empty { background: transparent; border: 1.5px dashed #C9C4B2; }
+  .board-cell .cell-kicker { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; margin-bottom: 4px; }
+  .board-cell.center .cell-kicker { color: #9FC3D6; }
+  .board-cell .cell-title {
+    font-size: 14px; font-weight: 600; line-height: 1.3; flex: 1;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .board-cell.center .cell-title { font-size: 15px; -webkit-line-clamp: 3; }
+  .board-cell .cell-footer { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 8px; font-size: 10.5px; }
+  .board-cell .cell-owner { color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .board-cell.center .cell-owner { color: #C6D6E0; }
+  .board-cell .cell-count { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .board-cell.center .cell-count { color: #9FC3D6; }
+  .board-controls { position: absolute; top: 6px; right: 6px; display: flex; gap: 2px; z-index: 5; }
+  .board-controls .mini-btn { color: var(--text-muted); font-size: 12px; padding: 2px 4px; }
+  .board-cell.center .board-controls .mini-btn { color: #cfe0ea; }
+  .board-cell.center .board-controls .mini-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+  .dot-not-started { background: #B4B0A2; }
+  .dot-in-progress { background: #5B8FA8; }
+  .dot-done { background: var(--green); }
+  .dot-blocked { background: var(--danger); }
+
+  .board-cell .edit-form textarea, .board-cell .edit-form input, .board-cell .edit-form select {
+    font-size: 12px; padding: 5px 6px;
+  }
+  .board-cell.center .edit-form textarea, .board-cell.center .edit-form input, .board-cell.center .edit-form select {
+    background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.35); color: #fff;
+  }
+  .board-cell.center .edit-form input::placeholder { color: rgba(255,255,255,0.5); }
+  .board-cell.center .cancel-btn { background: transparent; border-color: rgba(255,255,255,0.4); color: #fff; }
+
+  .overflow-heading { font-size: 12px; color: var(--text-muted); margin: 4px 0 8px 2px; }
+  .board-note { font-size: 11.5px; color: var(--text-muted); margin: 0 0 16px 2px; }
+
+  .team-lists { margin-top: 44px; padding-top: 24px; border-top: 1px solid var(--card-border); }
+  .team-lists h2 { font-size: 18px; margin: 0 0 4px 0; color: var(--navy); }
+  .team-lists .sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+  .list-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .list-tab {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 999px;
+    padding: 7px 16px; font-size: 13px; cursor: pointer; color: var(--navy);
+  }
+  .list-tab:hover { border-color: var(--teal-border); }
+  .list-tab.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .list-tab .count { opacity: 0.7; margin-left: 4px; }
+
+  .list-panel-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+  .list-entries { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .list-row {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 10px;
+    padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: flex-start;
+    position: relative;
+  }
+  .list-field { display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
+  .list-field.grow { flex: 1; min-width: 180px; }
+  .list-field label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+  .list-field .val { font-size: 13.5px; color: var(--navy); word-break: break-word; }
+  .list-field .val.empty { color: var(--text-muted); font-style: italic; opacity: 0.7; }
+  .list-row-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; z-index: 5; }
+
+  .list-add-form {
+    background: #fff; border: 1.5px dashed var(--card-border); border-radius: 10px; padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .list-add-form .fields-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .list-add-form .field-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 150px; flex: 1; }
+  .list-add-form .field-wrap.grow { flex: 2; min-width: 220px; }
+  .list-add-form label { font-size: 11px; color: var(--text-muted); }
+  .list-add-form input, .list-add-form select {
+    font-family: inherit; font-size: 13px; padding: 7px 9px; border: 1px solid var(--card-border); border-radius: 6px;
+  }
+  .list-add-toggle {
+    border: 1.5px dashed var(--card-border); border-radius: 10px; padding: 12px; text-align: center;
+    color: var(--text-muted); cursor: pointer; font-size: 13px;
+  }
+  .list-add-toggle:hover { border-color: var(--teal-border); color: var(--navy); background: #fff; }
+  .list-empty { font-size: 13px; color: var(--text-muted); padding: 14px 2px; }
+
+  .child-card {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 10px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 8px; cursor: pointer; position: relative;
+    transition: border-color 0.15s;
+  }
+  .child-card:hover { border-color: var(--teal-border); }
+  .child-card .card-title { font-size: 15px; font-weight: 600; line-height: 1.35; padding-right: 40px; }
+  .card-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; z-index: 5; }
+  .mini-btn {
+    background: transparent; border: none; color: var(--text-muted); cursor: pointer;
+    font-size: 13px; padding: 3px 5px; border-radius: 4px; line-height: 1;
+  }
+  .mini-btn:hover { background: var(--teal-tint); color: var(--navy); }
+
+  .card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 2px; }
+  .owner-tag { font-size: 12px; color: var(--text-muted); }
+  .owner-tag.empty { font-style: italic; opacity: 0.7; }
+  .status-pill { font-size: 11px; padding: 3px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .status-not-started { background: #ECEAE2; color: #6B6656; }
+  .status-in-progress { background: var(--teal-tint); color: #235167; }
+  .status-done { background: var(--green-bg); color: var(--green); }
+  .status-blocked { background: var(--danger-bg); color: var(--danger); }
+  .subtask-count { font-size: 11px; color: var(--text-muted); }
+
+  .edit-form { display: flex; flex-direction: column; gap: 8px; }
+  .edit-form textarea, .edit-form input, .edit-form select {
+    font-family: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--card-border);
+    border-radius: 6px; width: 100%;
+  }
+  .edit-form textarea { resize: vertical; min-height: 44px; }
+  .edit-row { display: flex; gap: 8px; }
+  .edit-actions { display: flex; gap: 6px; justify-content: flex-end; }
+  .edit-actions button { font-size: 12px; padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+  .save-btn { background: var(--navy); color: #fff; border: none; }
+  .cancel-btn { background: #fff; border: 1px solid var(--card-border); color: var(--navy); }
+
+  .add-card {
+    border: 1.5px dashed var(--card-border); border-radius: 10px; padding: 14px 16px;
+    display: flex; align-items: center; justify-content: center; color: var(--text-muted);
+    cursor: pointer; font-size: 14px; min-height: 76px;
+  }
+  .add-card:hover { border-color: var(--teal-border); color: var(--navy); background: #fff; }
+
+  .new-task-form {
+    background: #fff; border: 1px solid var(--card-border); border-radius: 10px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .new-task-form input { font-family: inherit; font-size: 13px; padding: 7px 9px; border: 1px solid var(--card-border); border-radius: 6px; }
+
+  .empty-state { text-align: center; color: var(--text-muted); font-size: 13px; padding: 30px 10px; }
+
+  .status-banner {
+    font-size: 12px; padding: 8px 12px; border-radius: 6px; margin-bottom: 14px;
+  }
+  .status-banner.error { background: var(--danger-bg); color: var(--danger); }
+  .status-banner.info { background: var(--teal-tint); color: #235167; }
+
+  .loading { text-align: center; padding: 60px 0; color: var(--text-muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">Loading roadmap...</div></div>
+
+<!-- Supabase client (public CDN, no build step) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+// ---------------------------------------------------------------------------
+// Supabase connection. Both values below are meant to be public and shipped
+// in browser code: the anon key only grants what the table's Row Level
+// Security policies allow (currently: read + insert + update on kv_store).
+// The database password is NOT here and must never be.
+// ---------------------------------------------------------------------------
+const SUPABASE_URL = "https://kbrjcdnivmrfusdoxagh.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_zaAb6zpMBdf0FqFyYNtZJw_OG9V9A9F";
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Drop-in replacement for the old window.storage API. Keeps the same shape
+// the rest of the app expects: get() -> { value: "<json string>" } | null,
+// set() -> truthy on success / null on failure.
+const db = {
+  async get(key) {
+    const { data, error } = await sb
+      .from("kv_store")
+      .select("value")
+      .eq("key", key)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return null;
+    return { value: JSON.stringify(data.value) };
+  },
+  async set(key, valueString) {
+    const { error } = await sb
+      .from("kv_store")
+      .upsert(
+        { key, value: JSON.parse(valueString), updated_at: new Date().toISOString() },
+        { onConflict: "key" }
+      );
+    if (error) { console.error("Supabase save failed:", error); return null; }
+    return { ok: true };
+  }
+};
+
+const STORAGE_KEY = "ironowl-roadmap-v1";
+const SHARED = true;
+const STATUSES = ["Not started", "In progress", "Done", "Blocked"];
+const STATUS_CLASS = {
+  "Not started": "status-not-started",
+  "In progress": "status-in-progress",
+  "Done": "status-done",
+  "Blocked": "status-blocked"
+};
+
+let tree = null;
+let currentId = "root";
+let editingId = null;
+let addingChildOf = null;
+let banner = null;
+
+function uid() {
+  return "n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function seedTree() {
+  const nodes = {};
+  const rootId = "root";
+  nodes[rootId] = {
+    id: rootId, title: "27 dealers live by 2/7/2027 \u2014 built to beat every TPA.",
+    owner: "", status: "In progress", parentId: null, children: []
+  };
+
+  const categories = [
+    { name: "Product", actions: [
+      "iO270\u00b0 core platform live","Contract admin end-to-end","AI claims adjudication built",
+      "iO Optix layered in","Direct DMS integrations","Living Cession dashboard",
+      "Radical reserve/fee transparency","Architected to adapt with AI"
+    ]},
+    { name: "Launch", actions: [
+      "Discovery & deep dive done","Strategy & design aligned","Program architecture mapped",
+      "Data integration configured","Team readiness prep","Self-guided launch wizard",
+      "White-glove go-live support","We launch confidence"
+    ]},
+    { name: "Training", actions: [
+      "Psychology-first curriculum built","Practice-driven live sessions","AI-powered role play",
+      "Compliance built into training","iO Optix tracks performance","Self-coaching feedback loop",
+      "Language guardrails embedded","Continuous, not one-time"
+    ]},
+    { name: "Onboarding", actions: [
+      "Ideal future state defined","Financial objectives aligned","White-label vision set",
+      "System workflows mapped","Data integration kicked off","Dealer teams prepped",
+      "Dedicated onboarding expert","Handoff to Optimize & Grow"
+    ]},
+    { name: "Accounting", actions: [
+      "Living Cession, real time","GL-style reconciliation","No 3-month-old reports",
+      "Reserve adequacy tracked live","Remittance automated","Premium tax/fees auto-calc",
+      "Trust balance dashboard","Zero manual reconciliation"
+    ]},
+    { name: "Analytics", actions: [
+      "iO Optix live dashboards","Penetration & PVR tracked","Employee leaderboard live",
+      "Product mix visibility","Predictive underwriting insights","Dealer performance benchmarking",
+      "Loss ratio trend alerts","Insight before profit impact"
+    ]},
+    { name: "Claims", actions: [
+      "Real-time claims trends","Predictive loss intervention","AI-adjudicated claims",
+      "Faster, seamless claims experience","Time back to service teams","Claims reserve accuracy live",
+      "Loss ratio protection built-in","Great claims = loyal customers"
+    ]},
+    { name: "Communications/Marketing", actions: [
+      "Welcome box + training videos","Reverse FAQ dealer messaging","\u201cWe made it obsolete\u201d story",
+      "White-glove launch comms","Branded co-marketing materials","Self-launch instruction kit",
+      "hello@ironowl.com CTA touch","\u201cLast TPA you\u2019ll ever need\u201d"
+    ]}
+  ];
+
+  categories.forEach(cat => {
+    const catId = uid();
+    nodes[catId] = { id: catId, title: cat.name, owner: "", status: "Not started", parentId: rootId, children: [] };
+    nodes[rootId].children.push(catId);
+    cat.actions.forEach(actionTitle => {
+      const actId = uid();
+      nodes[actId] = { id: actId, title: actionTitle, owner: "", status: "Not started", parentId: catId, children: [] };
+      nodes[catId].children.push(actId);
+    });
+  });
+
+  return { rootId, nodes };
+}
+
+async function loadTree(allowSeed = true) {
+  try {
+    const result = await db.get(STORAGE_KEY);
+    if (result && result.value) {
+      tree = JSON.parse(result.value);
+    } else if (allowSeed) {
+      // First run ever: no row yet. Seed the default 64-item roadmap.
+      tree = seedTree();
+      await saveTree();
+    }
+  } catch (err) {
+    console.error("Load failed:", err);
+    if (allowSeed && !tree) {
+      // Can't reach the DB on the very first load and have nothing to show.
+      tree = seedTree();
+    } else {
+      banner = { type: "error", text: "Couldn't reach the database - showing the last data loaded." };
+    }
+  }
+  render();
+}
+
+async function saveTree() {
+  try {
+    const result = await db.set(STORAGE_KEY, JSON.stringify(tree));
+    if (!result) {
+      banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
+    }
+  } catch (err) {
+    banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
+  }
+}
+
+function getNode(id) { return tree.nodes[id]; }
+
+function getPath(id) {
+  const path = [];
+  let n = getNode(id);
+  while (n) {
+    path.unshift(n);
+    n = n.parentId ? getNode(n.parentId) : null;
+  }
+  return path;
+}
+
+function collectDescendants(id) {
+  const ids = [id];
+  const node = getNode(id);
+  if (node) {
+    node.children.forEach(childId => { ids.push(...collectDescendants(childId)); });
+  }
+  return ids;
+}
+
+window.navigateTo = function(id) {
+  currentId = id;
+  editingId = null;
+  addingChildOf = null;
+  render();
+};
+
+window.startEdit = function(id, ev) {
+  if (ev) ev.stopPropagation();
+  editingId = id;
+  addingChildOf = null;
+  render();
+};
+
+window.cancelEdit = function() {
+  editingId = null;
+  render();
+};
+
+window.saveEdit = async function(id) {
+  const titleEl = document.getElementById("edit-title-" + id);
+  const ownerEl = document.getElementById("edit-owner-" + id);
+  const statusEl = document.getElementById("edit-status-" + id);
+  const title = titleEl.value.trim();
+  if (!title) { titleEl.style.borderColor = "#B23B3B"; return; }
+  const node = getNode(id);
+  node.title = title;
+  // The root goal's edit form has no owner/status inputs - guard for that.
+  if (ownerEl) node.owner = ownerEl.value.trim();
+  if (statusEl) node.status = statusEl.value;
+  editingId = null;
+  await saveTree();
+  render();
+};
+
+window.deleteNode = async function(id, ev) {
+  if (ev) ev.stopPropagation();
+  const node = getNode(id);
+  const childCount = collectDescendants(id).length - 1;
+  const msg = childCount > 0
+    ? 'Delete "' + node.title + '" and its ' + childCount + ' subtask(s)? This cannot be undone.'
+    : 'Delete "' + node.title + '"?';
+  if (!window.confirm(msg)) return;
+  const parentId = node.parentId;
+  const toDelete = collectDescendants(id);
+  toDelete.forEach(did => { delete tree.nodes[did]; });
+  const parent = getNode(parentId);
+  parent.children = parent.children.filter(cid => cid !== id);
+  if (currentId === id) currentId = parentId;
+  await saveTree();
+  render();
+};
+
+window.startAddChild = function(parentId) {
+  addingChildOf = parentId;
+  editingId = null;
+  render();
+  setTimeout(() => {
+    const el = document.getElementById("new-task-input");
+    if (el) el.focus();
+  }, 0);
+};
+
+window.cancelAddChild = function() {
+  addingChildOf = null;
+  render();
+};
+
+window.confirmAddChild = async function(parentId) {
+  const input = document.getElementById("new-task-input");
+  const title = input.value.trim();
+  if (!title) { input.style.borderColor = "#B23B3B"; return; }
+  const id = uid();
+  tree.nodes[id] = { id, title, owner: "", status: "Not started", parentId, children: [] };
+  getNode(parentId).children.push(id);
+  addingChildOf = null;
+  await saveTree();
+  render();
+};
+
+window.handleNewTaskKey = function(ev, parentId) {
+  if (ev.key === "Enter") window.confirmAddChild(parentId);
+  if (ev.key === "Escape") window.cancelAddChild();
+};
+
+window.dismissBanner = function() {
+  banner = null;
+  render();
+};
+
+window.resetRoadmap = async function() {
+  if (!window.confirm("Reset the entire roadmap back to the original 64-item plan? This deletes all edits and custom sub-roadmaps.")) return;
+  tree = seedTree();
+  currentId = "root";
+  await saveTree();
+  render();
+};
+
+window.refreshFromStorage = async function() {
+  banner = null;
+  await loadTree();
+  await loadLists();
+};
+
+// Live updates: when anyone writes to kv_store, pull the change into open
+// browsers. Skipped while this user is mid-edit so their form isn't wiped.
+function subscribeToLiveUpdates() {
+  sb.channel("kv_store_live")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "kv_store" },
+      () => {
+        if (editingId || addingChildOf || addingToList || editingListEntry) return;
+        loadTree(false);
+        loadLists(false);
+      }
+    )
+    .subscribe();
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+const LIST_SCHEMAS = {
+  resources: {
+    key: "ironowl-list-resources-v1",
+    title: "Resource requests",
+    description: "Log requested resources with timing and estimated cost.",
+    fields: [
+      { id: "item", label: "Resource", type: "text", placeholder: "What's needed", grow: true },
+      { id: "requestedBy", label: "Requested by", type: "text", placeholder: "Name" },
+      { id: "neededBy", label: "Needed by", type: "date" },
+      { id: "cost", label: "Est. cost", type: "text", placeholder: "$" },
+      { id: "status", label: "Status", type: "select", options: ["Requested", "Approved", "Ordered", "Received", "Declined"] },
+      { id: "notes", label: "Notes", type: "text", placeholder: "Optional notes", grow: true }
+    ]
+  },
+  process: {
+    key: "ironowl-list-process-v1",
+    title: "Process improvements",
+    description: "Log requests to fix or improve a process.",
+    fields: [
+      { id: "item", label: "Improvement", type: "text", placeholder: "What should change", grow: true },
+      { id: "requestedBy", label: "Requested by", type: "text", placeholder: "Name" },
+      { id: "area", label: "Area", type: "text", placeholder: "e.g. Onboarding" },
+      { id: "status", label: "Status", type: "select", options: ["Proposed", "In review", "In progress", "Done", "Declined"] },
+      { id: "notes", label: "Notes", type: "text", placeholder: "Optional notes", grow: true }
+    ]
+  },
+  moonshot: {
+    key: "ironowl-list-moonshot-v1",
+    title: "Moonshot parking lot",
+    description: "New project or improvement ideas, however big or early.",
+    fields: [
+      { id: "item", label: "Idea", type: "text", placeholder: "The big idea", grow: true },
+      { id: "submittedBy", label: "Submitted by", type: "text", placeholder: "Name" },
+      { id: "impact", label: "Potential impact", type: "select", options: ["Low", "Medium", "High", "Game-changer"] },
+      { id: "notes", label: "Notes", type: "text", placeholder: "Optional notes", grow: true }
+    ]
+  }
+};
+
+let listsData = { resources: [], process: [], moonshot: [] };
+let activeListTab = "resources";
+let addingToList = null;
+let editingListEntry = null;
+
+async function loadLists(allowReset = true) {
+  for (const key of Object.keys(LIST_SCHEMAS)) {
+    try {
+      const result = await db.get(LIST_SCHEMAS[key].key);
+      if (result && result.value) {
+        listsData[key] = JSON.parse(result.value);
+      } else if (allowReset) {
+        listsData[key] = [];
+      }
+    } catch (err) {
+      console.error("List load failed (" + key + "):", err);
+      // Keep whatever is already in memory rather than blanking the list.
+    }
+  }
+  render();
+}
+
+async function saveList(listKey) {
+  try {
+    const result = await db.set(LIST_SCHEMAS[listKey].key, JSON.stringify(listsData[listKey]));
+    if (!result) banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
+  } catch (err) {
+    banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
+  }
+}
+
+window.switchListTab = function(key) {
+  activeListTab = key;
+  addingToList = null;
+  editingListEntry = null;
+  render();
+};
+
+window.startAddListEntry = function(listKey) {
+  addingToList = listKey;
+  editingListEntry = null;
+  render();
+};
+
+window.cancelAddListEntry = function() {
+  addingToList = null;
+  render();
+};
+
+window.confirmAddListEntry = async function(listKey) {
+  const schema = LIST_SCHEMAS[listKey];
+  const entry = { id: uid(), createdAt: Date.now() };
+  let firstFieldEl = null;
+  let hasValue = false;
+  schema.fields.forEach(f => {
+    const el = document.getElementById("list-new-" + f.id);
+    if (!firstFieldEl) firstFieldEl = el;
+    const val = el ? el.value.trim() : "";
+    entry[f.id] = val;
+    if (f.id === schema.fields[0].id && val) hasValue = true;
+  });
+  if (!hasValue) {
+    if (firstFieldEl) firstFieldEl.style.borderColor = "#B23B3B";
+    return;
+  }
+  listsData[listKey].unshift(entry);
+  addingToList = null;
+  await saveList(listKey);
+  render();
+};
+
+window.startEditListEntry = function(listKey, id, ev) {
+  if (ev) ev.stopPropagation();
+  editingListEntry = listKey + ":" + id;
+  addingToList = null;
+  render();
+};
+
+window.cancelEditListEntry = function() {
+  editingListEntry = null;
+  render();
+};
+
+window.saveEditListEntry = async function(listKey, id) {
+  const schema = LIST_SCHEMAS[listKey];
+  const entry = listsData[listKey].find(e => e.id === id);
+  schema.fields.forEach(f => {
+    const el = document.getElementById("list-edit-" + f.id + "-" + id);
+    if (el) entry[f.id] = el.value.trim();
+  });
+  editingListEntry = null;
+  await saveList(listKey);
+  render();
+};
+
+window.deleteListEntry = async function(listKey, id, ev) {
+  if (ev) ev.stopPropagation();
+  if (!window.confirm("Delete this entry?")) return;
+  listsData[listKey] = listsData[listKey].filter(e => e.id !== id);
+  await saveList(listKey);
+  render();
+};
+
+function renderListFieldInput(f, elId, existingValue) {
+  const val = existingValue ? escapeHtml(existingValue) : "";
+  if (f.type === "select") {
+    return '<select id="' + elId + '">' +
+      '<option value=""></option>' +
+      f.options.map(o => '<option value="' + o + '"' + (existingValue === o ? ' selected' : '') + '>' + o + '</option>').join('') +
+      '</select>';
+  }
+  const type = f.type === "date" ? "date" : "text";
+  return '<input type="' + type + '" id="' + elId + '" placeholder="' + (f.placeholder || "") + '" value="' + val + '">';
+}
+
+function renderListAddForm(listKey) {
+  const schema = LIST_SCHEMAS[listKey];
+  return '<div class="list-add-form">' +
+    '<div class="fields-row">' +
+      schema.fields.map(f =>
+        '<div class="field-wrap' + (f.grow ? ' grow' : '') + '">' +
+          '<label>' + f.label + '</label>' +
+          renderListFieldInput(f, "list-new-" + f.id, "") +
+        '</div>'
+      ).join('') +
+    '</div>' +
+    '<div class="edit-actions">' +
+      '<button class="cancel-btn" onclick="cancelAddListEntry()">Cancel</button>' +
+      '<button class="save-btn" onclick="confirmAddListEntry(\'' + listKey + '\')">Add entry</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderListRow(listKey, entry) {
+  const schema = LIST_SCHEMAS[listKey];
+  const editKey = listKey + ":" + entry.id;
+
+  if (editingListEntry === editKey) {
+    return '<div class="list-row">' +
+      '<div class="fields-row" style="width:100%;">' +
+        schema.fields.map(f =>
+          '<div class="field-wrap' + (f.grow ? ' grow' : '') + '">' +
+            '<label>' + f.label + '</label>' +
+            renderListFieldInput(f, "list-edit-" + f.id + "-" + entry.id, entry[f.id]) +
+          '</div>'
+        ).join('') +
+      '</div>' +
+      '<div class="edit-actions" style="width:100%;">' +
+        '<button class="cancel-btn" onclick="cancelEditListEntry()">Cancel</button>' +
+        '<button class="save-btn" onclick="saveEditListEntry(\'' + listKey + '\', \'' + entry.id + '\')">Save</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  return '<div class="list-row">' +
+    '<div class="list-row-controls">' +
+      '<button class="mini-btn" title="Edit" onclick="startEditListEntry(\'' + listKey + '\', \'' + entry.id + '\', event)">\u270E</button>' +
+      '<button class="mini-btn" title="Delete" onclick="deleteListEntry(\'' + listKey + '\', \'' + entry.id + '\', event)">\u2715</button>' +
+    '</div>' +
+    schema.fields.map(f => {
+      const v = entry[f.id];
+      return '<div class="list-field' + (f.grow ? ' grow' : '') + '">' +
+        '<label>' + f.label + '</label>' +
+        '<div class="val' + (v ? '' : ' empty') + '">' + (v ? escapeHtml(v) : '\u2014') + '</div>' +
+      '</div>';
+    }).join('') +
+  '</div>';
+}
+
+function renderTeamLists() {
+  let html = '<div class="team-lists" id="team-lists">';
+  html += '<h2>Team lists</h2>';
+  html += '<div class="sub">Shared with everyone who opens this app \u2014 log requests and ideas here.</div>';
+
+  html += '<div class="list-tabs">';
+  Object.keys(LIST_SCHEMAS).forEach(key => {
+    const count = listsData[key].length;
+    html += '<div class="list-tab' + (activeListTab === key ? ' active' : '') + '" onclick="switchListTab(\'' + key + '\')">' +
+      LIST_SCHEMAS[key].title + '<span class="count">' + count + '</span></div>';
+  });
+  html += '</div>';
+
+  const schema = LIST_SCHEMAS[activeListTab];
+  const entries = listsData[activeListTab];
+  html += '<div class="list-panel-desc">' + schema.description + '</div>';
+
+  html += '<div class="list-entries">';
+  if (entries.length === 0) {
+    html += '<div class="list-empty">Nothing logged yet.</div>';
+  } else {
+    entries.forEach(entry => { html += renderListRow(activeListTab, entry); });
+  }
+  html += '</div>';
+
+  if (addingToList === activeListTab) {
+    html += renderListAddForm(activeListTab);
+  } else {
+    html += '<div class="list-add-toggle" onclick="startAddListEntry(\'' + activeListTab + '\')">+ Add to ' + schema.title.toLowerCase() + '</div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function renderBreadcrumb(path) {
+  return '<div class="breadcrumb">' + path.map((n, i) => {
+    const isLast = i === path.length - 1;
+    const label = escapeHtml(n.title.length > 40 ? n.title.slice(0, 40) + "\u2026" : n.title);
+    const sep = i > 0 ? '<span class="sep">/</span>' : '';
+    if (isLast) {
+      return sep + '<span class="crumb current">' + label + '</span>';
+    }
+    return sep + '<span class="crumb" onclick="navigateTo(\'' + n.id + '\')">' + label + '</span>';
+  }).join('') + '</div>';
+}
+
+function renderChildCard(child) {
+  if (editingId === child.id) {
+    return '<div class="child-card" style="cursor:default;" onclick="event.stopPropagation()">' +
+      '<div class="edit-form">' +
+        '<textarea id="edit-title-' + child.id + '">' + escapeHtml(child.title) + '</textarea>' +
+        '<div class="edit-row">' +
+          '<input id="edit-owner-' + child.id + '" placeholder="Owner" value="' + escapeHtml(child.owner || "") + '">' +
+          '<select id="edit-status-' + child.id + '">' +
+            STATUSES.map(s => '<option value="' + s + '"' + (s === child.status ? ' selected' : '') + '>' + s + '</option>').join('') +
+          '</select>' +
+        '</div>' +
+        '<div class="edit-actions">' +
+          '<button class="cancel-btn" onclick="cancelEdit()">Cancel</button>' +
+          '<button class="save-btn" onclick="saveEdit(\'' + child.id + '\')">Save</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  const count = child.children.length;
+  const ownerHtml = child.owner
+    ? '<span class="owner-tag">' + escapeHtml(child.owner) + '</span>'
+    : '<span class="owner-tag empty">Unassigned</span>';
+
+  return '<div class="child-card" onclick="navigateTo(\'' + child.id + '\')">' +
+    '<div class="card-controls">' +
+      '<button class="mini-btn" title="Edit" onclick="startEdit(\'' + child.id + '\', event)">\u270E</button>' +
+      '<button class="mini-btn" title="Delete" onclick="deleteNode(\'' + child.id + '\', event)">\u2715</button>' +
+    '</div>' +
+    '<div class="card-title">' + escapeHtml(child.title) + '</div>' +
+    '<div class="card-footer">' +
+      ownerHtml +
+      '<span class="status-pill ' + STATUS_CLASS[child.status] + '">' + child.status + '</span>' +
+    '</div>' +
+    (count > 0 ? '<div class="subtask-count">' + count + ' subtask' + (count === 1 ? '' : 's') + '</div>' : '') +
+  '</div>';
+}
+
+function renderAddCard(parentId) {
+  if (addingChildOf === parentId) {
+    return '<div class="new-task-form" onclick="event.stopPropagation()">' +
+      '<input id="new-task-input" placeholder="New task or subtask..." onkeydown="handleNewTaskKey(event, \'' + parentId + '\')">' +
+      '<div class="edit-actions">' +
+        '<button class="cancel-btn" onclick="cancelAddChild()">Cancel</button>' +
+        '<button class="save-btn" onclick="confirmAddChild(\'' + parentId + '\')">Add</button>' +
+      '</div>' +
+    '</div>';
+  }
+  return '<div class="add-card" onclick="startAddChild(\'' + parentId + '\')">+ Add task</div>';
+}
+
+function statusDotClass(status) {
+  return "dot-" + STATUS_CLASS[status].replace("status-", "");
+}
+
+function renderCenterCell(node) {
+  const isRoot = node.id === tree.rootId;
+  const kicker = isRoot ? "Goal" : (getNode(node.parentId).id === tree.rootId ? "Workstream" : "Task");
+
+  if (editingId === node.id) {
+    return '<div class="board-cell center" style="grid-column:2; grid-row:2;" onclick="event.stopPropagation()">' +
+      '<div class="edit-form">' +
+        '<textarea id="edit-title-' + node.id + '">' + escapeHtml(node.title) + '</textarea>' +
+        (!isRoot ? '<div class="edit-row">' +
+          '<input id="edit-owner-' + node.id + '" placeholder="Owner" value="' + escapeHtml(node.owner || "") + '">' +
+          '<select id="edit-status-' + node.id + '">' +
+            STATUSES.map(s => '<option value="' + s + '"' + (s === node.status ? ' selected' : '') + '>' + s + '</option>').join('') +
+          '</select>' +
+        '</div>' : '') +
+        '<div class="edit-actions">' +
+          '<button class="cancel-btn" onclick="cancelEdit()">Cancel</button>' +
+          '<button class="save-btn" onclick="saveEdit(\'' + node.id + '\')">Save</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  const footer = !isRoot
+    ? '<div class="cell-footer">' +
+        '<span class="cell-owner"><span class="status-dot ' + statusDotClass(node.status) + '"></span> ' + (node.owner ? escapeHtml(node.owner) : 'Unassigned') + '</span>' +
+      '</div>'
+    : '<div class="cell-footer"><span class="cell-owner">' + node.status + '</span></div>';
+
+  return '<div class="board-cell center" style="grid-column:2; grid-row:2;">' +
+    '<div class="board-controls"><button class="mini-btn" title="Edit" onclick="startEdit(\'' + node.id + '\', event)">\u270E</button></div>' +
+    '<div><div class="cell-kicker">' + kicker + '</div><div class="cell-title">' + escapeHtml(node.title) + '</div></div>' +
+    footer +
+  '</div>';
+}
+
+function renderChildCell(child) {
+  if (editingId === child.id) {
+    return '<div class="board-cell child" style="cursor:default;" onclick="event.stopPropagation()">' +
+      '<div class="edit-form">' +
+        '<textarea id="edit-title-' + child.id + '">' + escapeHtml(child.title) + '</textarea>' +
+        '<div class="edit-row">' +
+          '<input id="edit-owner-' + child.id + '" placeholder="Owner" value="' + escapeHtml(child.owner || "") + '">' +
+        '</div>' +
+        '<select id="edit-status-' + child.id + '">' +
+          STATUSES.map(s => '<option value="' + s + '"' + (s === child.status ? ' selected' : '') + '>' + s + '</option>').join('') +
+        '</select>' +
+        '<div class="edit-actions">' +
+          '<button class="cancel-btn" onclick="cancelEdit()">Cancel</button>' +
+          '<button class="save-btn" onclick="saveEdit(\'' + child.id + '\')">Save</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  const count = child.children.length;
+  return '<div class="board-cell child" onclick="navigateTo(\'' + child.id + '\')">' +
+    '<div class="board-controls">' +
+      '<button class="mini-btn" title="Edit" onclick="startEdit(\'' + child.id + '\', event)">\u270E</button>' +
+      '<button class="mini-btn" title="Delete" onclick="deleteNode(\'' + child.id + '\', event)">\u2715</button>' +
+    '</div>' +
+    '<div class="cell-title">' + escapeHtml(child.title) + '</div>' +
+    '<div class="cell-footer">' +
+      '<span class="cell-owner"><span class="status-dot ' + statusDotClass(child.status) + '"></span> ' + (child.owner ? escapeHtml(child.owner) : 'Unassigned') + '</span>' +
+    '</div>' +
+    (count > 0 ? '<div class="cell-count">' + count + ' subtask' + (count === 1 ? '' : 's') + '</div>' : '') +
+  '</div>';
+}
+
+function renderEmptyCell() {
+  return '<div class="board-cell empty"></div>';
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const node = getNode(currentId);
+  const path = getPath(currentId);
+  const children = node.children.map(id => getNode(id)).filter(Boolean);
+  const ringChildren = children.slice(0, 8);
+  const overflowChildren = children.slice(8);
+
+  let html = '';
+  html += '<div class="topbar">' +
+    '<div><h1>IronOwl Roadmap</h1><div class="sub">Shared with your team \u2014 click any task to open its subtasks</div></div>' +
+    '<div class="topbar-actions">' +
+      '<button class="icon-btn" onclick="document.getElementById(\'team-lists\').scrollIntoView({behavior:\'smooth\'})">Team lists \u2193</button>' +
+      '<button class="icon-btn" onclick="refreshFromStorage()">Refresh</button>' +
+      '<button class="icon-btn" onclick="resetRoadmap()">Reset to original plan</button>' +
+    '</div>' +
+  '</div>';
+
+  if (banner) {
+    html += '<div class="status-banner ' + banner.type + '" onclick="dismissBanner()">' + escapeHtml(banner.text) + ' (dismiss)</div>';
+  }
+
+  html += renderBreadcrumb(path);
+
+  // 3x3 board: center = current node, ring = up to 8 children
+  const ringOrder = [0, 1, 2, 3, 5, 6, 7, 8]; // grid positions skipping center (4)
+  const cells = new Array(9).fill(null);
+  cells[4] = renderCenterCell(node);
+  ringOrder.forEach((pos, i) => {
+    cells[pos] = ringChildren[i] ? renderChildCell(ringChildren[i]) : renderEmptyCell();
+  });
+
+  html += '<div class="board">' + cells.join('') + '</div>';
+
+  html += '<div class="board-note">' + children.length + ' subtask' + (children.length === 1 ? '' : 's') +
+    (addingChildOf === node.id ? '' : ' \u00b7 <span style="text-decoration:underline;cursor:pointer;" onclick="startAddChild(\'' + node.id + '\')">+ add another</span>') +
+  '</div>';
+
+  if (addingChildOf === node.id) {
+    html += renderAddCard(node.id);
+  }
+
+  if (overflowChildren.length > 0) {
+    html += '<div class="overflow-heading">' + overflowChildren.length + ' more subtask' + (overflowChildren.length === 1 ? '' : 's') + ' (beyond the board\u2019s 8 slots)</div>';
+    html += '<div class="children-grid">';
+    overflowChildren.forEach(child => { html += renderChildCard(child); });
+    html += '</div>';
+  }
+
+  html += renderTeamLists();
+
+  app.innerHTML = html;
+}
+
+loadTree();
+loadLists();
+subscribeToLiveUpdates();
+</script>
+</body>
+</html>
