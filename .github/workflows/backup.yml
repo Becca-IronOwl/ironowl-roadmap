@@ -1,8 +1,13 @@
-name: Daily data backup
+name: Nightly backup & snapshot
 
-# Snapshots all roadmap data to backups/ once a day so any bad edit,
-# deletion, or overwrite can be recovered. Also runnable on demand from the
-# Actions tab (Run workflow).
+# Every night this:
+#  1. saves all roadmap data to backups/YYYY-MM-DD.json
+#  2. builds snapshot.html - a self-contained, read-only copy of the whole app
+#     with that data baked in, served at
+#     https://becca-ironowl.github.io/ironowl-roadmap/snapshot.html
+#  3. emails the snapshot to becca@ironowl.com (only if a RESEND_API_KEY secret
+#     is set - otherwise that step is skipped)
+# Also runnable on demand: Actions tab -> this workflow -> Run workflow.
 
 on:
   schedule:
@@ -32,6 +37,7 @@ jobs:
           set -euo pipefail
           mkdir -p backups
           stamp="$(date -u +%Y-%m-%d)"
+          echo "STAMP=$stamp" >> "$GITHUB_ENV"
           get() { curl -sf "$SB_URL/rest/v1/$1?select=*" -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY"; }
           jq -n \
             --arg generated_at "$(date -u +%FT%TZ)" \
@@ -42,6 +48,21 @@ jobs:
             > "backups/$stamp.json"
           echo "rows: tasks=$(jq '.tasks|length' backups/$stamp.json) todos=$(jq '.todos|length' backups/$stamp.json) list_entries=$(jq '.list_entries|length' backups/$stamp.json)"
 
+      - name: Build static snapshot.html
+        run: |
+          set -euo pipefail
+          src="backups/$STAMP.json"
+          # inject the data as a global right after <body>, before the app script.
+          line=$(grep -n '^<body>' index.html | head -1 | cut -d: -f1)
+          head -n "$line" index.html > snapshot.html
+          printf '<script>window.SNAPSHOT_DATA=' >> snapshot.html
+          # escape every "<" as < so nothing in the data can close the
+          # <script> tag (e.g. a task title containing "</script>").
+          jq -c '{generated_at, tasks, todos, list_entries}' "$src" | sed 's/</\\u003c/g' >> snapshot.html
+          printf ';</script>\n' >> snapshot.html
+          tail -n +$((line + 1)) index.html >> snapshot.html
+          echo "snapshot.html: $(wc -c < snapshot.html) bytes"
+
       - name: Prune backups older than 120 days
         run: |
           cd backups
@@ -49,12 +70,36 @@ jobs:
 
       - name: Commit if changed
         run: |
-          git config user.name "roadmap-backup-bot"
+          git config user.name "cube9-backup-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add backups/
+          git add backups/ snapshot.html
           if git diff --staged --quiet; then
-            echo "No changes to back up."
+            echo "Nothing changed."
           else
-            git commit -m "Data backup $(date -u +%F)"
+            git commit -m "Nightly backup + snapshot $(date -u +%F)"
             git push
           fi
+
+      - name: Email the snapshot
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          MAIL_TO: becca@ironowl.com
+        run: |
+          set -euo pipefail
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "RESEND_API_KEY secret not set - skipping the email step."
+            exit 0
+          fi
+          content=$(base64 -w0 snapshot.html)
+          payload=$(jq -n --arg to "$MAIL_TO" --arg content "$content" --arg stamp "$STAMP" '{
+            from: "Cube9 Backup <onboarding@resend.dev>",
+            to: [$to],
+            subject: ("IronOwl Cube9 - offline snapshot " + $stamp),
+            text: ("Attached is a self-contained, read-only copy of the roadmap as of tonight (" + $stamp + ").\nOpen it in any browser if the live app is ever unavailable.\n\nLive app: https://becca-ironowl.github.io/ironowl-roadmap/\nAlways-current snapshot: https://becca-ironowl.github.io/ironowl-roadmap/snapshot.html"),
+            attachments: [{ filename: ("cube9-snapshot-" + $stamp + ".html"), content: $content }]
+          }')
+          curl -sf -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$payload" > /dev/null
+          echo "Snapshot emailed to $MAIL_TO"
