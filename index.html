@@ -248,14 +248,23 @@
     font-family: inherit; font-size: 13px; padding: 7px 9px; border: 1px solid var(--card-border);
     border-radius: 6px; width: 100%; color: var(--navy);
   }
-  .todo-add-row { display: flex; gap: 6px; }
+  .todo-add-row { display: flex; gap: 6px; align-items: center; }
   .todo-add-row .todo-name { flex: 1 1 auto; min-width: 0; }
   .todo-add-row .todo-date { flex: 0 1 auto; min-width: 0; }
+  .todo-ws {
+    flex: 1 1 auto; min-width: 0; font-family: inherit; font-size: 12px; color: var(--navy);
+    padding: 7px 8px; border: 1px solid var(--card-border); border-radius: 6px; background: #fff;
+  }
   .todo-add-btn {
     background: var(--navy); color: #fff; border: none; border-radius: 6px;
     padding: 7px 12px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0;
   }
   .todo-add-btn:hover { background: var(--navy-dark); }
+  .todo-ws-tag {
+    background: var(--teal-tint); color: #235167; border-radius: 4px;
+    padding: 0 5px; font-size: 10.5px; font-weight: 600;
+  }
+  .todo-item.done .todo-ws-tag { background: #E9E6DA; color: #9DAA9C; }
   .todo-list { list-style: none; margin: 0; padding: 0; }
   .todo-item { display: flex; align-items: flex-start; gap: 9px; padding: 9px 2px; border-top: 1px solid #EEE9DB; }
   .todo-item:first-child { border-top: none; }
@@ -1040,7 +1049,8 @@ let todos = [];
 function mapTodoRow(r) {
   return {
     id: r.id, text: r.body || "", name: r.assignee || "", deadline: r.deadline || "",
-    done: !!r.done, completedAt: r.completed_at || null, createdAt: r.created_at
+    done: !!r.done, completedAt: r.completed_at || null, createdAt: r.created_at,
+    workstream: r.workstream_id || null   // which top-level workstream this to-do belongs to (null = General)
   };
 }
 
@@ -1060,9 +1070,14 @@ window.addTodo = async function() {
   const textEl = document.getElementById("todo-text");
   const nameEl = document.getElementById("todo-name");
   const dateEl = document.getElementById("todo-deadline");
+  const wsEl = document.getElementById("todo-workstream");
   const text = textEl.value.trim();
   if (!text) { textEl.style.borderColor = "#B23B3B"; return; }
-  const row = { id: uid(), body: text, assignee: nameEl.value.trim(), deadline: dateEl.value, done: false };
+  const wsId = wsEl && wsEl.value ? wsEl.value : null;
+  const row = {
+    id: uid(), body: text, assignee: nameEl.value.trim(), deadline: dateEl.value,
+    done: false, workstream_id: wsId
+  };
   todos.push(mapTodoRow(Object.assign({}, row, { completed_at: null, created_at: new Date().toISOString() })));
   render();
   setTimeout(() => {
@@ -1109,8 +1124,23 @@ function isOverdue(d) {
   return !isNaN(dt.getTime()) && dt < today;
 }
 
-function renderTodoItem(t) {
+// The top-level workstream that contains the node currently on the board
+// (null when we're at the goal/root, i.e. "show all to-dos").
+function viewWorkstreamId() {
+  if (!tree || currentId === tree.rootId) return null;
+  let n = tree.nodes[currentId];
+  while (n && n.parentId && n.parentId !== tree.rootId) n = tree.nodes[n.parentId];
+  return n && n.parentId === tree.rootId ? n.id : null;
+}
+
+function workstreamTitle(id) {
+  return id && tree && tree.nodes[id] ? tree.nodes[id].title : null;
+}
+
+function renderTodoItem(t, showWs) {
   const parts = [];
+  const wsName = showWs ? workstreamTitle(t.workstream) : null;
+  if (wsName) parts.push('<span class="todo-ws-tag">' + escapeHtml(wsName) + '</span>');
   if (t.name) parts.push(escapeHtml(t.name));
   if (t.deadline) {
     const dl = formatDeadline(t.deadline);
@@ -1127,17 +1157,50 @@ function renderTodoItem(t) {
 }
 
 function renderTodoPanel() {
-  const active = todos.filter(t => !t.done);
-  const done = todos.filter(t => t.done).sort((a, b) => (a.completedAt || 0) - (b.completedAt || 0));
+  // Decide what slice of to-dos to show and what to default the add form to.
+  let list = todos;
+  let heading = "To do";
+  let addWs = "";          // pre-selected workstream in the add form
+  let showWs = true;       // show each item's workstream tag on its row
+
+  if (ownerFilter) {
+    const target = normName(ownerFilter);
+    list = todos.filter(t => normName(t.name) === target);
+    heading = "To do &middot; " + escapeHtml(ownerFilter);
+  } else {
+    const wsId = viewWorkstreamId();
+    if (wsId && tree.nodes[wsId]) {
+      list = todos.filter(t => t.workstream === wsId);
+      heading = "To do &middot; " + escapeHtml(tree.nodes[wsId].title);
+      addWs = wsId;
+      showWs = false;       // everything here is the same workstream
+    }
+  }
+
+  const active = list.filter(t => !t.done);
+  const done = list.filter(t => t.done).sort((a, b) => (a.completedAt || 0) - (b.completedAt || 0));
   const ordered = active.concat(done);
 
+  const wsOptions = tree
+    ? tree.nodes[tree.rootId].children.map(id => tree.nodes[id]).filter(Boolean)
+        .map(n => '<option value="' + n.id + '"' + (n.id === addWs ? ' selected' : '') + '>' + escapeHtml(n.title) + '</option>')
+        .join('')
+    : "";
+  const nameVal = ownerFilter ? ' value="' + escapeHtml(ownerFilter) + '"' : '';
+
   let html = '<div class="todo-panel">';
-  html += '<h2>To do</h2>';
+  html += '<h2>' + heading + '</h2>';
   html += '<div class="todo-add">' +
     '<input id="todo-text" placeholder="Add a to-do…" onkeydown="handleTodoKey(event)">' +
     '<div class="todo-add-row">' +
-      '<input id="todo-name" class="todo-name" placeholder="Name">' +
+      '<input id="todo-name" class="todo-name" placeholder="Name"' + nameVal + '>' +
       '<input id="todo-deadline" class="todo-date" type="date" title="Deadline">' +
+    '</div>' +
+    '<div class="todo-add-row">' +
+      '<select id="todo-workstream" class="todo-ws" title="Which workstream">' +
+        '<option value=""' + (addWs === "" ? ' selected' : '') + '>General</option>' +
+        wsOptions +
+      '</select>' +
       '<button class="todo-add-btn" onclick="addTodo()">Add</button>' +
     '</div>' +
   '</div>';
@@ -1145,7 +1208,7 @@ function renderTodoPanel() {
   if (ordered.length === 0) {
     html += '<div class="todo-empty">Nothing here yet.</div>';
   } else {
-    html += '<ul class="todo-list">' + ordered.map(renderTodoItem).join('') + '</ul>';
+    html += '<ul class="todo-list">' + ordered.map(t => renderTodoItem(t, showWs)).join('') + '</ul>';
   }
   html += '</div>';
   return html;
@@ -1242,8 +1305,10 @@ function renderPersonReport() {
   if (todoMatches.length) {
     html += '<div class="report-group"><h3>To-dos (' + todoMatches.length + ')</h3>';
     todoMatches.forEach(t => {
+      const wsName = workstreamTitle(t.workstream);
       html += '<div class="report-row static">' +
         '<div class="rr-title' + (t.done ? ' rr-done' : '') + '">' + escapeHtml(t.text) + '</div>' +
+        (wsName ? '<div class="rr-path">' + escapeHtml(wsName) + '</div>' : '') +
         '<div class="rr-foot">' +
           (t.deadline ? '<span class="rr-path">Due ' + escapeHtml(formatDeadline(t.deadline)) + '</span>' : '') +
           '<span class="status-pill ' + (t.done ? 'status-done">Done' : 'status-in-progress">Open') + '</span>' +
