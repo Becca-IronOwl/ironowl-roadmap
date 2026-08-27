@@ -324,44 +324,24 @@
 <script>
 // ---------------------------------------------------------------------------
 // Supabase connection. Both values below are meant to be public and shipped
-// in browser code: the anon key only grants what the table's Row Level
-// Security policies allow (currently: read + insert + update on kv_store).
-// The database password is NOT here and must never be.
+// in browser code: the anon key only grants what the tables' Row Level
+// Security policies allow. The database password is NOT here and never should be.
+//
+// Data model: one row per item, so simultaneous edits to different items
+// don't overwrite each other.
+//   tasks(id, parent_id, title, owner, status, sort_order)  - the roadmap tree
+//   todos(id, body, assignee, deadline, done, completed_at)
+//   list_entries(id, list, data jsonb)                      - the three team lists
 // ---------------------------------------------------------------------------
 const SUPABASE_URL = "https://kbrjcdnivmrfusdoxagh.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_zaAb6zpMBdf0FqFyYNtZJw_OG9V9A9F";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Drop-in replacement for the old window.storage API. Keeps the same shape
-// the rest of the app expects: get() -> { value: "<json string>" } | null,
-// set() -> truthy on success / null on failure.
-const db = {
-  async get(key) {
-    const { data, error } = await sb
-      .from("kv_store")
-      .select("value")
-      .eq("key", key)
-      .maybeSingle();
-    if (error) throw error;
-    if (!data) return null;
-    return { value: JSON.stringify(data.value) };
-  },
-  async set(key, valueString) {
-    const { error } = await sb
-      .from("kv_store")
-      .upsert(
-        { key, value: JSON.parse(valueString), updated_at: new Date().toISOString() },
-        { onConflict: "key" }
-      );
-    if (error) { console.error("Supabase save failed:", error); return null; }
-    return { ok: true };
-  }
-};
+function bannerError(msg) {
+  banner = { type: "error", text: msg || "That didn't save - hit Refresh to get the latest, then try again." };
+}
 
-const STORAGE_KEY = "ironowl-roadmap-v1";
-const TODOS_KEY = "ironowl-todos-v1";
-const SHARED = true;
 const STATUSES = ["Not started", "In progress", "Done", "Blocked"];
 const STATUS_CLASS = {
   "Not started": "status-not-started",
@@ -446,37 +426,72 @@ function seedTree() {
   return { rootId, nodes };
 }
 
+// Build the in-memory { rootId, nodes } shape the rest of the app expects
+// from a flat list of task rows.
+function buildTree(rows) {
+  const nodes = {};
+  rows.forEach(r => {
+    nodes[r.id] = {
+      id: r.id, title: r.title, owner: r.owner || "", status: r.status || "Not started",
+      parentId: r.parent_id, children: [], _sort: r.sort_order || 0
+    };
+  });
+  rows.forEach(r => {
+    if (r.parent_id && nodes[r.parent_id]) nodes[r.parent_id].children.push(r.id);
+  });
+  Object.values(nodes).forEach(n => n.children.sort((a, b) => nodes[a]._sort - nodes[b]._sort));
+  const root = rows.find(r => !r.parent_id) || rows[0];
+  return { rootId: root ? root.id : "root", nodes: nodes };
+}
+
 async function loadTree(allowSeed = true) {
   try {
-    const result = await db.get(STORAGE_KEY);
-    if (result && result.value) {
-      tree = JSON.parse(result.value);
+    const { data, error } = await sb.from("tasks").select("*");
+    if (error) throw error;
+    if (data && data.length) {
+      tree = buildTree(data);
+      if (!tree.nodes[currentId]) currentId = tree.rootId;
     } else if (allowSeed) {
-      // First run ever: no row yet. Seed the default 64-item roadmap.
-      tree = seedTree();
-      await saveTree();
+      // Empty database (fresh project): plant the default roadmap once. If two
+      // browsers race to do this, the loser's insert fails on the primary key -
+      // that's fine, it just reloads the winner's rows.
+      try { await seedTasks(); } catch (seedErr) { console.warn("seed skipped:", seedErr.message); }
+      return loadTree(false);
     }
   } catch (err) {
     console.error("Load failed:", err);
-    if (allowSeed && !tree) {
-      // Can't reach the DB on the very first load and have nothing to show.
-      tree = seedTree();
-    } else {
-      banner = { type: "error", text: "Couldn't reach the database - showing the last data loaded." };
-    }
+    if (!tree) bannerError("Couldn't reach the database. Give it a moment and hit Refresh.");
+    else bannerError("Couldn't reach the database - showing the last data loaded.");
   }
   render();
 }
 
-async function saveTree() {
-  try {
-    const result = await db.set(STORAGE_KEY, JSON.stringify(tree));
-    if (!result) {
-      banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
-    }
-  } catch (err) {
-    banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
+// Insert task rows parents-first so the parent_id foreign key is always satisfied.
+async function insertTasksInOrder(rows) {
+  const done = new Set();
+  let remaining = rows.slice();
+  while (remaining.length) {
+    const ready = remaining.filter(r => !r.parent_id || done.has(r.parent_id));
+    if (!ready.length) throw new Error("tasks have no reachable root");
+    const { error } = await sb.from("tasks").insert(ready);
+    if (error) throw error;
+    ready.forEach(r => done.add(r.id));
+    remaining = remaining.filter(r => !done.has(r.id));
   }
+}
+
+async function seedTasks() {
+  const seed = seedTree();
+  const rows = [];
+  Object.values(seed.nodes).forEach(n => {
+    const sibs = n.parentId ? seed.nodes[n.parentId].children : [];
+    rows.push({
+      id: n.id, parent_id: n.parentId, title: n.title,
+      owner: n.owner || "", status: n.status || "Not started",
+      sort_order: n.parentId ? sibs.indexOf(n.id) : 0
+    });
+  });
+  await insertTasksInOrder(rows);
 }
 
 function getNode(id) { return tree.nodes[id]; }
@@ -526,13 +541,17 @@ window.saveEdit = async function(id) {
   const title = titleEl.value.trim();
   if (!title) { titleEl.style.borderColor = "#B23B3B"; return; }
   const node = getNode(id);
-  node.title = title;
+  const patch = { title: title, updated_at: new Date().toISOString() };
   // The root goal's edit form has no owner/status inputs - guard for that.
-  if (ownerEl) node.owner = ownerEl.value.trim();
-  if (statusEl) node.status = statusEl.value;
+  if (ownerEl) patch.owner = ownerEl.value.trim();
+  if (statusEl) patch.status = statusEl.value;
+  Object.assign(node, { title: patch.title });          // optimistic
+  if (ownerEl) node.owner = patch.owner;
+  if (statusEl) node.status = patch.status;
   editingId = null;
-  await saveTree();
   render();
+  const { error } = await sb.from("tasks").update(patch).eq("id", id);
+  if (error) { console.error(error); bannerError(); await loadTree(false); }
 };
 
 window.deleteNode = async function(id, ev) {
@@ -544,13 +563,14 @@ window.deleteNode = async function(id, ev) {
     : 'Delete "' + node.title + '"?';
   if (!window.confirm(msg)) return;
   const parentId = node.parentId;
-  const toDelete = collectDescendants(id);
-  toDelete.forEach(did => { delete tree.nodes[did]; });
+  collectDescendants(id).forEach(did => { delete tree.nodes[did]; });  // optimistic
   const parent = getNode(parentId);
-  parent.children = parent.children.filter(cid => cid !== id);
-  if (currentId === id) currentId = parentId;
-  await saveTree();
+  if (parent) parent.children = parent.children.filter(cid => cid !== id);
+  if (currentId === id || !tree.nodes[currentId]) currentId = parentId || tree.rootId;
   render();
+  // The parent_id foreign key cascades the delete to every descendant row.
+  const { error } = await sb.from("tasks").delete().eq("id", id);
+  if (error) { console.error(error); bannerError(); await loadTree(false); }
 };
 
 window.startAddChild = function(parentId) {
@@ -573,11 +593,15 @@ window.confirmAddChild = async function(parentId) {
   const title = input.value.trim();
   if (!title) { input.style.borderColor = "#B23B3B"; return; }
   const id = uid();
-  tree.nodes[id] = { id, title, owner: "", status: "Not started", parentId, children: [] };
+  const sortOrder = Date.now();
+  tree.nodes[id] = { id, title, owner: "", status: "Not started", parentId, children: [], _sort: sortOrder };
   getNode(parentId).children.push(id);
   addingChildOf = null;
-  await saveTree();
   render();
+  const { error } = await sb.from("tasks").insert({
+    id: id, parent_id: parentId, title: title, owner: "", status: "Not started", sort_order: sortOrder
+  });
+  if (error) { console.error(error); bannerError(); await loadTree(false); }
 };
 
 window.handleNewTaskKey = function(ev, parentId) {
@@ -590,34 +614,35 @@ window.dismissBanner = function() {
   render();
 };
 
-// seedTree() still runs once automatically on the very first load (empty
-// database). There is deliberately no user-facing "reset everything" button -
-// it was too easy to wipe the whole team's roadmap by accident.
+// The default roadmap is planted once, automatically, only when the database
+// is completely empty. There is deliberately no user-facing "reset everything"
+// button - it was too easy to wipe the whole team's roadmap by accident.
 
 window.refreshFromStorage = async function() {
   banner = null;
-  await loadTree();
-  await loadLists();
-  await loadTodos();
+  await Promise.all([loadTree(false), loadLists(), loadTodos()]);
 };
 
-// Live updates: when anyone writes to kv_store, pull the change into open
-// browsers. Skipped while this user is mid-edit so their form isn't wiped.
+// Live updates: when anyone changes a row, pull the latest into open browsers.
+// Skipped while this user has an edit form open or a field focused, so their
+// in-progress work isn't yanked out from under them.
 function subscribeToLiveUpdates() {
-  sb.channel("kv_store_live")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "kv_store" },
-      () => {
-        if (editingId || addingChildOf || addingToList || editingListEntry) return;
-        // Don't yank a half-typed to-do out from under someone.
-        const ae = document.activeElement;
-        if (ae && ae.id && ae.id.indexOf("todo-") === 0) return;
-        loadTree(false);
-        loadLists(false);
-        loadTodos(false);
-      }
-    )
+  let timer = null;
+  const reload = () => {
+    if (editingId || addingChildOf || addingToList || editingListEntry) return;
+    const ae = document.activeElement;
+    if (ae && ae.id && (ae.id.indexOf("todo-") === 0 || ae.id.indexOf("list-") === 0)) return;
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      loadTree(false);
+      loadTodos();
+      loadLists();
+    }, 250);
+  };
+  sb.channel("roadmap_live")
+    .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, reload)
+    .on("postgres_changes", { event: "*", schema: "public", table: "todos" }, reload)
+    .on("postgres_changes", { event: "*", schema: "public", table: "list_entries" }, reload)
     .subscribe();
 }
 
@@ -671,30 +696,20 @@ let activeListTab = "resources";
 let addingToList = null;
 let editingListEntry = null;
 
-async function loadLists(allowReset = true) {
-  for (const key of Object.keys(LIST_SCHEMAS)) {
-    try {
-      const result = await db.get(LIST_SCHEMAS[key].key);
-      if (result && result.value) {
-        listsData[key] = JSON.parse(result.value);
-      } else if (allowReset) {
-        listsData[key] = [];
-      }
-    } catch (err) {
-      console.error("List load failed (" + key + "):", err);
-      // Keep whatever is already in memory rather than blanking the list.
-    }
+async function loadLists() {
+  try {
+    const { data, error } = await sb.from("list_entries").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    const grouped = { resources: [], process: [], moonshot: [] };
+    (data || []).forEach(r => {
+      if (grouped[r.list]) grouped[r.list].push(Object.assign({ id: r.id, createdAt: r.created_at }, r.data || {}));
+    });
+    listsData = grouped;
+  } catch (err) {
+    console.error("List load failed:", err);
+    // Keep whatever is already in memory rather than blanking the lists.
   }
   render();
-}
-
-async function saveList(listKey) {
-  try {
-    const result = await db.set(LIST_SCHEMAS[listKey].key, JSON.stringify(listsData[listKey]));
-    if (!result) banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
-  } catch (err) {
-    banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
-  }
 }
 
 window.switchListTab = function(key) {
@@ -717,24 +732,26 @@ window.cancelAddListEntry = function() {
 
 window.confirmAddListEntry = async function(listKey) {
   const schema = LIST_SCHEMAS[listKey];
-  const entry = { id: uid(), createdAt: Date.now() };
+  const data = {};
   let firstFieldEl = null;
   let hasValue = false;
   schema.fields.forEach(f => {
     const el = document.getElementById("list-new-" + f.id);
     if (!firstFieldEl) firstFieldEl = el;
     const val = el ? el.value.trim() : "";
-    entry[f.id] = val;
+    data[f.id] = val;
     if (f.id === schema.fields[0].id && val) hasValue = true;
   });
   if (!hasValue) {
     if (firstFieldEl) firstFieldEl.style.borderColor = "#B23B3B";
     return;
   }
-  listsData[listKey].unshift(entry);
+  const id = uid();
+  listsData[listKey].unshift(Object.assign({ id: id, createdAt: new Date().toISOString() }, data));
   addingToList = null;
-  await saveList(listKey);
   render();
+  const { error } = await sb.from("list_entries").insert({ id: id, list: listKey, data: data });
+  if (error) { console.error(error); bannerError(); await loadLists(); }
 };
 
 window.startEditListEntry = function(listKey, id, ev) {
@@ -752,21 +769,26 @@ window.cancelEditListEntry = function() {
 window.saveEditListEntry = async function(listKey, id) {
   const schema = LIST_SCHEMAS[listKey];
   const entry = listsData[listKey].find(e => e.id === id);
+  const data = {};
   schema.fields.forEach(f => {
     const el = document.getElementById("list-edit-" + f.id + "-" + id);
-    if (el) entry[f.id] = el.value.trim();
+    const val = el ? el.value.trim() : (entry[f.id] || "");
+    data[f.id] = val;
+    entry[f.id] = val;
   });
   editingListEntry = null;
-  await saveList(listKey);
   render();
+  const { error } = await sb.from("list_entries").update({ data: data }).eq("id", id);
+  if (error) { console.error(error); bannerError(); await loadLists(); }
 };
 
 window.deleteListEntry = async function(listKey, id, ev) {
   if (ev) ev.stopPropagation();
   if (!window.confirm("Delete this entry?")) return;
   listsData[listKey] = listsData[listKey].filter(e => e.id !== id);
-  await saveList(listKey);
   render();
+  const { error } = await sb.from("list_entries").delete().eq("id", id);
+  if (error) { console.error(error); bannerError(); await loadLists(); }
 };
 
 function renderListFieldInput(f, elId, existingValue) {
@@ -1010,33 +1032,28 @@ function renderEmptyCell() {
 }
 
 // ---------------------------------------------------------------------------
-// To-do list (right-hand column). Stored as its own kv_store row: an array of
-// { id, text, name, deadline, done, createdAt, completedAt }.
+// To-do list (right-hand column). One row per to-do in the `todos` table.
+// DB columns body/assignee map to the in-memory text/name used by the render code.
 // ---------------------------------------------------------------------------
 let todos = [];
 
-async function loadTodos(allowReset = true) {
+function mapTodoRow(r) {
+  return {
+    id: r.id, text: r.body || "", name: r.assignee || "", deadline: r.deadline || "",
+    done: !!r.done, completedAt: r.completed_at || null, createdAt: r.created_at
+  };
+}
+
+async function loadTodos() {
   try {
-    const result = await db.get(TODOS_KEY);
-    if (result && result.value) {
-      todos = JSON.parse(result.value);
-    } else if (allowReset) {
-      todos = [];
-    }
+    const { data, error } = await sb.from("todos").select("*").order("created_at", { ascending: true });
+    if (error) throw error;
+    todos = (data || []).map(mapTodoRow);
   } catch (err) {
     console.error("To-do load failed:", err);
     // Keep whatever is already in memory.
   }
   render();
-}
-
-async function saveTodos() {
-  try {
-    const result = await db.set(TODOS_KEY, JSON.stringify(todos));
-    if (!result) banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
-  } catch (err) {
-    banner = { type: "error", text: "Save failed. Your last change may not have persisted." };
-  }
 }
 
 window.addTodo = async function() {
@@ -1045,21 +1062,15 @@ window.addTodo = async function() {
   const dateEl = document.getElementById("todo-deadline");
   const text = textEl.value.trim();
   if (!text) { textEl.style.borderColor = "#B23B3B"; return; }
-  todos.push({
-    id: uid(),
-    text: text,
-    name: nameEl.value.trim(),
-    deadline: dateEl.value,
-    done: false,
-    createdAt: Date.now(),
-    completedAt: null
-  });
-  await saveTodos();
+  const row = { id: uid(), body: text, assignee: nameEl.value.trim(), deadline: dateEl.value, done: false };
+  todos.push(mapTodoRow(Object.assign({}, row, { completed_at: null, created_at: new Date().toISOString() })));
   render();
   setTimeout(() => {
     const el = document.getElementById("todo-text");
     if (el) el.focus();
   }, 0);
+  const { error } = await sb.from("todos").insert(row);
+  if (error) { console.error(error); bannerError(); await loadTodos(); }
 };
 
 window.handleTodoKey = function(ev) {
@@ -1071,14 +1082,16 @@ window.toggleTodo = async function(id) {
   if (!t) return;
   t.done = !t.done;
   t.completedAt = t.done ? Date.now() : null;
-  await saveTodos();
   render();
+  const { error } = await sb.from("todos").update({ done: t.done, completed_at: t.completedAt }).eq("id", id);
+  if (error) { console.error(error); bannerError(); await loadTodos(); }
 };
 
 window.deleteTodo = async function(id) {
   todos = todos.filter(x => x.id !== id);
-  await saveTodos();
   render();
+  const { error } = await sb.from("todos").delete().eq("id", id);
+  if (error) { console.error(error); bannerError(); await loadTodos(); }
 };
 
 function formatDeadline(d) {
