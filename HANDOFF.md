@@ -50,10 +50,11 @@ name spelling consistent ("Tom" and "tom" match; "Tom" and "Tom S." don't).
 
 There are two different kinds of "edit":
 
-### 1. Roadmap content — titles, owners, statuses, list entries
+### 1. Roadmap content — titles, descriptions, owners, statuses, list entries, to-dos
 Just do it in the app. That's what the pencil/✕ buttons and "+ Add" forms are
-for. It saves to the database immediately. The whole team does this directly;
-you don't need Claude or a developer for it.
+for (each task also has an optional one-line **description** shown in italics
+under its title). It saves to the database immediately. The whole team does
+this directly; you don't need Claude or a developer for it.
 
 ### 2. The app itself — how it looks or works
 That means changing `index.html` in the GitHub repo. Options:
