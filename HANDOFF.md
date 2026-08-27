@@ -15,10 +15,19 @@ exact same field of the same item, saved within the same instant, falls back to
 "last save wins". (Before Aug 2026 the whole roadmap was one JSON blob and any
 two near-simultaneous edits could clobber each other - that's what got fixed.)
 
-**Backups:** a GitHub Action (`.github/workflows/backup.yml`) snapshots all
-three tables to `backups/YYYY-MM-DD.json` in the repo once a day, keeping 120
-days. Run it on demand any time from the repo's **Actions** tab -> *Daily data
-backup* -> *Run workflow*. To restore, hand Claude a backup file.
+**Backups & offline copy:** a GitHub Action
+(`.github/workflows/backup.yml`, "Nightly backup & snapshot") runs every night
+(and on demand: repo **Actions** tab -> that workflow -> *Run workflow*). It:
+- saves all data to `backups/YYYY-MM-DD.json` (kept 120 days) — hand a file to
+  Claude to restore;
+- builds `snapshot.html` - the whole app with that night's data baked in,
+  read-only, works with no network - served at
+  **https://becca-ironowl.github.io/ironowl-roadmap/snapshot.html** (bookmark
+  this; it's the fallback if the live app or database is ever down);
+- emails the snapshot to becca@ironowl.com **only if** a `RESEND_API_KEY`
+  repository secret is set (Settings -> Secrets and variables -> Actions).
+  Free Resend account -> API key -> paste as that secret. Until then the email
+  step just logs "skipped" and everything else still runs.
 
 **What's on the page:** the roadmap board + breadcrumbs, the three team lists
 (Resource requests / Process improvements / Moonshot parking lot), and a **To do**
