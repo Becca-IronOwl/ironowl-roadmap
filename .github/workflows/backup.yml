@@ -1,0 +1,60 @@
+name: Daily data backup
+
+# Snapshots all roadmap data to backups/ once a day so any bad edit,
+# deletion, or overwrite can be recovered. Also runnable on demand from the
+# Actions tab (Run workflow).
+
+on:
+  schedule:
+    - cron: "0 8 * * *"   # 08:00 UTC daily (~3am US Central)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch data from Supabase
+        env:
+          # The publishable key is read-only under the table policies and is
+          # already public in index.html - nothing secret here.
+          SB_URL: https://kbrjcdnivmrfusdoxagh.supabase.co
+          SB_KEY: sb_publishable_zaAb6zpMBdf0FqFyYNtZJw_OG9V9A9F
+        run: |
+          set -euo pipefail
+          mkdir -p backups
+          stamp="$(date -u +%Y-%m-%d)"
+          get() { curl -sf "$SB_URL/rest/v1/$1?select=*" -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY"; }
+          jq -n \
+            --arg generated_at "$(date -u +%FT%TZ)" \
+            --argjson tasks "$(get tasks)" \
+            --argjson todos "$(get todos)" \
+            --argjson list_entries "$(get list_entries)" \
+            '{generated_at: $generated_at, tasks: $tasks, todos: $todos, list_entries: $list_entries}' \
+            > "backups/$stamp.json"
+          echo "rows: tasks=$(jq '.tasks|length' backups/$stamp.json) todos=$(jq '.todos|length' backups/$stamp.json) list_entries=$(jq '.list_entries|length' backups/$stamp.json)"
+
+      - name: Prune backups older than 120 days
+        run: |
+          cd backups
+          ls -1 *.json 2>/dev/null | sort | head -n -120 | xargs -r rm -v || true
+
+      - name: Commit if changed
+        run: |
+          git config user.name "roadmap-backup-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add backups/
+          if git diff --staged --quiet; then
+            echo "No changes to back up."
+          else
+            git commit -m "Data backup $(date -u +%F)"
+            git push
+          fi
