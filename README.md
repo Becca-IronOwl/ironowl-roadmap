@@ -1,4 +1,4 @@
-# Cube Nine
+# IronOwl Cube9
 
 A single-file web app that shows the company roadmap as a recursive 3x3 "sudoku
 board" (goal in the center, up to 8 sub-items around it, click to drill in),
