@@ -1,0 +1,1108 @@
+{
+  "generated_at": "2026-09-01T08:03:35Z",
+  "tasks": [
+    {
+      "id": "root",
+      "parent_id": null,
+      "title": "27 dealers live by 2/7/2027",
+      "owner": "",
+      "status": "In progress",
+      "sort_order": 0,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtc5qjayxvv71",
+      "parent_id": "nmtbuwpec0n0se",
+      "title": "Packs signed off and loaded",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1787873528122,
+      "created_at": "2026-08-27T23:32:08.276677+00:00",
+      "updated_at": "2026-08-27T23:32:08.276677+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtc5vc88gbfut",
+      "parent_id": "nmtbuwpectzbcm",
+      "title": "Reinsurance Agreement Executed",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1787873752232,
+      "created_at": "2026-08-27T23:35:52.401199+00:00",
+      "updated_at": "2026-08-27T23:35:52.401199+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtc0stig8zkwl",
+      "parent_id": "nmtbuwpeclu42c",
+      "title": "California Forms",
+      "owner": "Cassie",
+      "status": "In progress",
+      "sort_order": 1787865236584,
+      "created_at": "2026-08-27T21:13:57.324733+00:00",
+      "updated_at": "2026-08-28T18:57:58.915+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtc5tgfdavu1n",
+      "parent_id": "nmtbuwpec0n0se",
+      "title": "Reserve/Pricing comparison delivered",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1787873664361,
+      "created_at": "2026-08-27T23:34:24.736329+00:00",
+      "updated_at": "2026-08-27T23:34:24.736329+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtc5vnu0bnqtj",
+      "parent_id": "nmtbuwpectzbcm",
+      "title": "Establish Target Loss Ratios",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1787873767272,
+      "created_at": "2026-08-27T23:36:07.431177+00:00",
+      "updated_at": "2026-08-27T23:36:10.992+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpec1fjvr",
+      "parent_id": "nmtbuwpechi5u2",
+      "title": "Contract change process deployed",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 4,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:46:58.621+00:00",
+      "description": "Cancellations, transfers, and changes"
+    },
+    {
+      "id": "nmtbuwpecqwub9",
+      "parent_id": "nmtbuwpec4t5o4",
+      "title": "Ford Form Filings",
+      "owner": "Cassie",
+      "status": "Not started",
+      "sort_order": 4,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T16:51:54.484+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecp0hwt",
+      "parent_id": "nmtbuwpec4t5o4",
+      "title": "Ally Form Filings",
+      "owner": "Cassie",
+      "status": "Not started",
+      "sort_order": 5,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T16:52:05.29+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecvf4b3",
+      "parent_id": "nmtbuwpechi5u2",
+      "title": "Living Cession, real time",
+      "owner": "",
+      "status": "In progress",
+      "sort_order": 1,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T21:03:50.014+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpect3m2z",
+      "parent_id": "nmtbuwpec8elux",
+      "title": "Brochures printed and shipped to IO",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 6,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:17:52.165+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecjrmn1",
+      "parent_id": "nmtbuwpec8elux",
+      "title": "Pre-loads",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 5,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:19:47.443+00:00",
+      "description": "Selected and ready"
+    },
+    {
+      "id": "nmtbuwpec1683m",
+      "parent_id": "nmtbuwpecm4l77",
+      "title": "Menu integration complete",
+      "owner": "Dave",
+      "status": "Not started",
+      "sort_order": 6,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:03:33.83+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecy5ioz",
+      "parent_id": "nmtbuwpecm4l77",
+      "title": "Dealer self service",
+      "owner": "Dave",
+      "status": "Not started",
+      "sort_order": 2,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:33:37.493+00:00",
+      "description": "Dealer driven pack and rate adjustments complete"
+    },
+    {
+      "id": "nmtc5ujjjq9gcq",
+      "parent_id": "nmtbuwpectzbcm",
+      "title": "Reinsurance Company established",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1787873715055,
+      "created_at": "2026-08-27T23:35:15.255758+00:00",
+      "updated_at": "2026-08-27T23:35:15.255758+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecm37ha",
+      "parent_id": "nmtbuwpec4t5o4",
+      "title": "Credit Acceptance Filings",
+      "owner": "Cassie",
+      "status": "Not started",
+      "sort_order": 6,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T16:52:24.332+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpechi5u2",
+      "parent_id": "root",
+      "title": "Accounting",
+      "owner": "Tom",
+      "status": "Not started",
+      "sort_order": 5,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:16:19.344+00:00",
+      "description": "Automated, self-service"
+    },
+    {
+      "id": "nmtbuwpecaf2la",
+      "parent_id": "nmtbuwpecm4l77",
+      "title": "Group level Accounting contact",
+      "owner": "Tom",
+      "status": "Not started",
+      "sort_order": 3,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:03:44.833+00:00",
+      "description": "Training and integration complete"
+    },
+    {
+      "id": "nmtbuwpec1lbv6",
+      "parent_id": "nmtbuwpec8elux",
+      "title": "VSC terms established",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:16:33.804+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbxalx51dcux",
+      "parent_id": "nmtbuwpec72clk",
+      "title": "California form filing",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecgvy02",
+      "parent_id": "nmtbuwpechi5u2",
+      "title": "GL-style reconciliation",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 2,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpede5rps",
+      "parent_id": "nmtbuwpecipvpo",
+      "title": "iO Optix live dashboards",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedr2k3h",
+      "parent_id": "nmtbuwpecipvpo",
+      "title": "Menu Complete",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 6,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:41:06.07+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtc6lmsr26olb",
+      "parent_id": "nmtbuwpec2rdb0",
+      "title": "Training QR's created and tested",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1787874978987,
+      "created_at": "2026-08-27T23:56:19.294636+00:00",
+      "updated_at": "2026-08-27T23:56:19.294636+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpece3vsn",
+      "parent_id": "nmtbuwpec4t5o4",
+      "title": "National Obligor Licenses",
+      "owner": "Cassie",
+      "status": "In progress",
+      "sort_order": 8,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T16:53:29.974+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecmyfh3",
+      "parent_id": "nmtbuwpecm4l77",
+      "title": "Agreements prepared and executed",
+      "owner": "Cassie",
+      "status": "Not started",
+      "sort_order": 1,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecelp0g",
+      "parent_id": "nmtbuwpechi5u2",
+      "title": "Automated statements to dealers",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 3,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:03:01.663+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpectwtr7",
+      "parent_id": "nmtbuwpec8elux",
+      "title": "Theft product ready",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 2,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:16:43.328+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecm5g7t",
+      "parent_id": "nmtbuwpec8elux",
+      "title": "Appearance product ready",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 3,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:16:59.132+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecdlq16",
+      "parent_id": "nmtbuwpec8elux",
+      "title": "Repair Guardian ready",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 4,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:17:10.727+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwped3wwml",
+      "parent_id": "nmtbuwpecipvpo",
+      "title": "Claims Analytics Live",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 4,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:41:40.285+00:00",
+      "description": "Predictive underwriting insights and loss ratio trend alerts"
+    },
+    {
+      "id": "nmtbuwpedj0ydy",
+      "parent_id": "root",
+      "title": "Communications/Marketing",
+      "owner": "Letty & Jeremiah",
+      "status": "Not started",
+      "sort_order": 8,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:02:58.01+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecxappr",
+      "parent_id": "root",
+      "title": "Launch",
+      "owner": "Becca",
+      "status": "Not started",
+      "sort_order": 3,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:29:40.535+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpec8elux",
+      "parent_id": "root",
+      "title": "Product Suite",
+      "owner": "Becca",
+      "status": "Not started",
+      "sort_order": 1,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:03:15.74+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtc5pxe6x4dp8",
+      "parent_id": "nmtbuwpec0n0se",
+      "title": "Reserves signed off and loaded",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1787873499726,
+      "created_at": "2026-08-27T23:31:39.892443+00:00",
+      "updated_at": "2026-08-27T23:31:39.892443+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedlp81q",
+      "parent_id": "nmtbuwpecipvpo",
+      "title": "Customer App live",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 7,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:41:45.955+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedydbe2",
+      "parent_id": "nmtbuwpecipvpo",
+      "title": "Executive Dashboard live",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 3,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:41:58.067+00:00",
+      "description": "Sean Kendrick requests"
+    },
+    {
+      "id": "nmtbuwpedkc4b2",
+      "parent_id": "nmtbuwpecipvpo",
+      "title": "Finance Dashboard live",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 2,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:42:07.75+00:00",
+      "description": "Sam and Shelby requests"
+    },
+    {
+      "id": "nmtbuwped495n8",
+      "parent_id": "nmtbuwpecipvpo",
+      "title": "Reinsurance Dashboard complete",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 5,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:44:50.466+00:00",
+      "description": "Reak-time cession statements"
+    },
+    {
+      "id": "nmtbuwpec8cipy",
+      "parent_id": "nmtbuwpechi5u2",
+      "title": "Remittance Process defined",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 5,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:46:24.449+00:00",
+      "description": "Automated, tested & deployed"
+    },
+    {
+      "id": "nmtbuwpecthebr",
+      "parent_id": "nmtbuwpechi5u2",
+      "title": "Deferred Revenue & Earnings Recognition",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 6,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:47:56.582+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecfldz6",
+      "parent_id": "nmtbuwpechi5u2",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 7,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:48:18.114+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecueoqh",
+      "parent_id": "nmtbuwpechi5u2",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 8,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:48:25.134+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecq45jf",
+      "parent_id": "nmtbuwpec8elux",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 8,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:50:32.063+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpechqx8r",
+      "parent_id": "nmtbuwpec8elux",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 7,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:50:37.726+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedr1ppo",
+      "parent_id": "nmtbuwpecipvpo",
+      "title": "QA",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 8,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:54:55.06+00:00",
+      "description": "All systems tested"
+    },
+    {
+      "id": "nmtbuwpecm4l77",
+      "parent_id": "root",
+      "title": "Dealer Integration",
+      "owner": "Becca",
+      "status": "Not started",
+      "sort_order": 4,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:03:20.421+00:00",
+      "description": "In advance of launch"
+    },
+    {
+      "id": "nmtbuwpecii6am",
+      "parent_id": "nmtbuwpecm4l77",
+      "title": "DMS integration complete",
+      "owner": "Dave",
+      "status": "Not started",
+      "sort_order": 5,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:03:51.074+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecipvpo",
+      "parent_id": "root",
+      "title": "Systems",
+      "owner": "Dave",
+      "status": "Not started",
+      "sort_order": 6,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:02:24.402+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedna3gk",
+      "parent_id": "root",
+      "title": "Claims & Customer Service",
+      "owner": "Jeremy",
+      "status": "Not started",
+      "sort_order": 7,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:02:30.694+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpec4t5o4",
+      "parent_id": "root",
+      "title": "Compliance & Legal",
+      "owner": "Cassie",
+      "status": "In progress",
+      "sort_order": 2,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:05:07.876+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpec0n0se",
+      "parent_id": "nmtbuwpecm4l77",
+      "title": "All pricing confirmed, loaded and signed off",
+      "owner": "Dan",
+      "status": "Not started",
+      "sort_order": 4,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:03:30.995+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpeclu42c",
+      "parent_id": "nmtbuwpec4t5o4",
+      "title": "Fortegra Form Filings",
+      "owner": "Cassie",
+      "status": "In progress",
+      "sort_order": 1,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T16:51:15.031+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpec72clk",
+      "parent_id": "nmtbuwpec4t5o4",
+      "title": "State Form Filings",
+      "owner": "Cassie",
+      "status": "Not started",
+      "sort_order": 2,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T16:51:31.673+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecsptk2",
+      "parent_id": "nmtbuwpec4t5o4",
+      "title": "FIS Form Filings",
+      "owner": "Cassie",
+      "status": "Not started",
+      "sort_order": 3,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T16:51:43.533+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecnwkg8",
+      "parent_id": "nmtbuwpec4t5o4",
+      "title": "Chase GAP Filings",
+      "owner": "Cassie",
+      "status": "Not started",
+      "sort_order": 7,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T16:53:06.205+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbxhtsmuv32j",
+      "parent_id": "nmtbuwpecmyfh3",
+      "title": "Dealer Agreement executed",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbxi11vn8r29",
+      "parent_id": "nmtbuwpecmyfh3",
+      "title": "Reinsurance Agreement Executed",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 2,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbxib62yrxes",
+      "parent_id": "nmtbuwpecmyfh3",
+      "title": "Warehouse Agreement Executed",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 3,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbxivj2hz22m",
+      "parent_id": "nmtbuwpecmyfh3",
+      "title": "Software Licensing Agreement Executed",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 4,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbxj7m1jd4fy",
+      "parent_id": "nmtbuwpecmyfh3",
+      "title": "Data Sharing Agreement Executed",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 5,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbxjiv1zjtc8",
+      "parent_id": "nmtbuwpecmyfh3",
+      "title": "W-9 Received",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 6,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecgozib",
+      "parent_id": "nmtbuwpecxappr",
+      "title": "Product training videos complete and delivered",
+      "owner": "JV",
+      "status": "Not started",
+      "sort_order": 1,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecmdqwy",
+      "parent_id": "nmtbuwpecxappr",
+      "title": "iO 270 live guidance complete",
+      "owner": "Dave",
+      "status": "Not started",
+      "sort_order": 2,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpechfem5",
+      "parent_id": "nmtbuwpecxappr",
+      "title": "AI-powered role play",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 3,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T20:51:32.897432+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedwez3i",
+      "parent_id": "nmtbuwpedj0ydy",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 4,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:52:25.313+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedhijkv",
+      "parent_id": "nmtbuwpedj0ydy",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 6,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:52:28.883+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwped52lo8",
+      "parent_id": "nmtbuwpedj0ydy",
+      "title": "Suite of launch communications complete",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 3,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T22:25:03.349+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedas96b",
+      "parent_id": "nmtbuwpedna3gk",
+      "title": "Repair Driven claims",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 2,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:14:16.529+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedhai87",
+      "parent_id": "nmtbuwpedna3gk",
+      "title": "Claims Team",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 3,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:14:38.376+00:00",
+      "description": "Hired, trained and ready"
+    },
+    {
+      "id": "nmtbuwped9r8ez",
+      "parent_id": "nmtbuwpedna3gk",
+      "title": "Virtual Claims payment",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 4,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:14:59.212+00:00",
+      "description": "via credit card"
+    },
+    {
+      "id": "nmtbuwpedo4z3b",
+      "parent_id": "nmtbuwpedj0ydy",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 7,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:52:31.583+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedx8ktg",
+      "parent_id": "nmtbuwpedna3gk",
+      "title": "ai Claims Adjudication",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:20:20.384+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedd8vse",
+      "parent_id": "nmtbuwpedj0ydy",
+      "title": "Welcome box delivered",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:20:50.033+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpec0xqc8",
+      "parent_id": "nmtbuwpecxappr",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 7,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:30:36.853+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecle0x7",
+      "parent_id": "nmtbuwpecxappr",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 8,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:30:40.175+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedsr7lw",
+      "parent_id": "nmtbuwpedj0ydy",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 8,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:52:34.104+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtc5q6yra92js",
+      "parent_id": "nmtbuwpec0n0se",
+      "title": "Fees confirmed accurate",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1787873512131,
+      "created_at": "2026-08-27T23:31:52.270901+00:00",
+      "updated_at": "2026-08-27T23:31:52.270901+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtc5upysyll0x",
+      "parent_id": "nmtbuwpectzbcm",
+      "title": "Trust Account created",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1787873723380,
+      "created_at": "2026-08-27T23:35:23.531989+00:00",
+      "updated_at": "2026-08-27T23:35:23.531989+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedgh782",
+      "parent_id": "nmtbuwpedna3gk",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 7,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:42:36.033+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedc2h68",
+      "parent_id": "nmtbuwpedna3gk",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 8,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:42:39.445+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedoekhp",
+      "parent_id": "nmtbuwpedna3gk",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 5,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:42:44.44+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedbi9qq",
+      "parent_id": "nmtbuwpedna3gk",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 6,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:42:48.16+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedg39d2",
+      "parent_id": "nmtbuwpedj0ydy",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 5,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-27T23:52:14.955+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtc6m78g4j9dq",
+      "parent_id": "nmtbuwpec2rdb0",
+      "title": "Brochures printed, packed and shipped",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 1787875005472,
+      "created_at": "2026-08-27T23:56:45.642115+00:00",
+      "updated_at": "2026-08-27T23:56:45.642115+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpedusuuu",
+      "parent_id": "nmtbuwpedj0ydy",
+      "title": "Launch LinkedIn Calendar planned",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 2,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:00:33.183+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpectzbcm",
+      "parent_id": "nmtbuwpecm4l77",
+      "title": "Reinsurance Set up",
+      "owner": "Tom",
+      "status": "Not started",
+      "sort_order": 7,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:03:38.412+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpec1cqti",
+      "parent_id": "nmtbuwpecm4l77",
+      "title": "Placeholder",
+      "owner": "",
+      "status": "Not started",
+      "sort_order": 8,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:03:55.303+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecmgoyq",
+      "parent_id": "nmtbuwpecxappr",
+      "title": "Personal connections complete: GM, FD, SD & OM",
+      "owner": "Jeremy",
+      "status": "Not started",
+      "sort_order": 4,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:04:10.499+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpecax133",
+      "parent_id": "nmtbuwpecxappr",
+      "title": "User access granted and verified",
+      "owner": "Spencer",
+      "status": "Not started",
+      "sort_order": 6,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:04:22.229+00:00",
+      "description": ""
+    },
+    {
+      "id": "nmtbuwpec2rdb0",
+      "parent_id": "nmtbuwpecxappr",
+      "title": "Welcome box delivered",
+      "owner": "JV",
+      "status": "Not started",
+      "sort_order": 5,
+      "created_at": "2026-08-27T20:51:32.897432+00:00",
+      "updated_at": "2026-08-28T00:04:29.248+00:00",
+      "description": ""
+    }
+  ],
+  "todos": [
+    {
+      "id": "nmtbx79zz3n0qa",
+      "body": "Investor 1 pager",
+      "assignee": "Becca",
+      "deadline": "2026-09-04",
+      "done": false,
+      "completed_at": null,
+      "created_at": "2026-08-27T19:33:12.671+00:00",
+      "workstream_id": null
+    },
+    {
+      "id": "nmtbx6sje6fe11",
+      "body": "Ryan Gee Deck",
+      "assignee": "Becca",
+      "deadline": "2026-09-02",
+      "done": false,
+      "completed_at": null,
+      "created_at": "2026-08-27T19:32:50.042+00:00",
+      "workstream_id": null
+    },
+    {
+      "id": "nmtho73g3kme5a",
+      "body": "EV Contract Decision",
+      "assignee": "Tom Patterson",
+      "deadline": "",
+      "done": false,
+      "completed_at": null,
+      "created_at": "2026-08-31T20:07:44.875321+00:00",
+      "workstream_id": null
+    }
+  ],
+  "list_entries": [
+    {
+      "id": "nmtbwetfzvjlg1",
+      "list": "moonshot",
+      "data": {
+        "item": "Dynamic Pricing",
+        "notes": "Q2 development start",
+        "impact": "High",
+        "submittedBy": "Becca"
+      },
+      "created_at": "2026-08-27T19:11:04.847+00:00"
+    },
+    {
+      "id": "nmtc5z9joi63ct",
+      "list": "moonshot",
+      "data": {
+        "item": "Guardian Angel",
+        "notes": "Q2 development start",
+        "impact": "Game-changer",
+        "submittedBy": "Becca"
+      },
+      "created_at": "2026-08-27T23:38:55.566597+00:00"
+    },
+    {
+      "id": "nmtc5zq3w8kbtv",
+      "list": "moonshot",
+      "data": {
+        "item": "Commissions Dashboard",
+        "notes": "Q2 development start",
+        "impact": "Medium",
+        "submittedBy": "Becca"
+      },
+      "created_at": "2026-08-27T23:39:16.990796+00:00"
+    },
+    {
+      "id": "nmtc67t2q672tt",
+      "list": "moonshot",
+      "data": {
+        "item": "Owl bot interactive iO Optix widget",
+        "notes": "Q2 development start",
+        "impact": "High",
+        "submittedBy": "Tom"
+      },
+      "created_at": "2026-08-27T23:45:34.399706+00:00"
+    },
+    {
+      "id": "nmtd57p8zgmnvp",
+      "list": "resources",
+      "data": {
+        "cost": "0",
+        "item": "V pay / Wex",
+        "notes": "",
+        "status": "Requested",
+        "neededBy": "2026-12-12",
+        "requestedBy": "Tom"
+      },
+      "created_at": "2026-08-28T16:05:16.582963+00:00"
+    },
+    {
+      "id": "nmtdjiy6za5uh4",
+      "list": "moonshot",
+      "data": {
+        "item": "TCC Competitive Service Menu",
+        "notes": "",
+        "impact": "Medium",
+        "submittedBy": "Becca"
+      },
+      "created_at": "2026-08-28T22:45:56.317163+00:00"
+    }
+  ]
+}
